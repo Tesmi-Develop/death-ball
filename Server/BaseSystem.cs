@@ -10,7 +10,7 @@ public class BaseSystem
     public virtual void PreInitialize() { }
     public virtual void Initialize() { }
     public virtual void PostInitialize() { }
-    public virtual void BeforeUpdate(float deltaTime) { }
-    public virtual void Update(float deltaTime) { }
-    public virtual void AfterUpdate(float deltaTime) { }
+    public virtual void BeforeUpdate(long tick) { }
+    public virtual void Update(long tick) { }
+    public virtual void AfterUpdate(long tick) { }
 }

@@ -8,6 +8,9 @@ public struct ClientData
     public Queue<Packet> PendingPackets = [];
     public Queue<Packet> IncomingPackets = [];
     public ClientConnection ClientConnection = null!;
+    public InputData[] InputsWithTick = new InputData[60];
+    public List<InputData> Inputs = [];
+    public int Id = 0;
 
     public ClientData()
     {

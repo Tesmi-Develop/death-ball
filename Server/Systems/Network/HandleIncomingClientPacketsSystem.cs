@@ -6,9 +6,9 @@ using Server.Components;
 using Shared.Data;
 using Exception = System.Exception;
 
-namespace Server.Systems;
+namespace Server.Systems.Network;
 
-[EcsSystem]
+[EcsSystem(EcsPriority.High)]
 public class HandleIncomingClientPacketsSystem : BaseSystem
 {
     [Dependency] private readonly ILogger _logger = null!;
@@ -18,8 +18,8 @@ public class HandleIncomingClientPacketsSystem : BaseSystem
     {
         _query = new QueryDescription().WithAll<ClientData>();
     }
-
-    public override void Update(float deltaTime)
+    
+    public override void BeforeUpdate(long tick)
     {
         world.Query(in _query, (Entity entity, ref ClientData playerData) =>
         {
@@ -43,7 +43,7 @@ public class HandleIncomingClientPacketsSystem : BaseSystem
         switch (packet.PacketType)
         {
             case PacketType.Request:
-                world.Create(new FromClient { PlayerEntity = entity });
+                ParseRequest(ref packet, entity);
                 break;
             default:
                 _logger.Warning($"Client sent unknown packet type {packet.PacketType}");
@@ -51,10 +51,21 @@ public class HandleIncomingClientPacketsSystem : BaseSystem
         }
     }
 
-    private void ParseRequest(ref Packet packet, Entity entity)
+    private void ParseRequest(ref Packet packet, Entity clientEntity)
     {
         var reader = new MessagePackReader(packet.Data);
         var componentId = reader.ReadInt32();
-        // TODO
+        var tick = reader.ReadInt64();
+
+        ref var clientData = ref world.Get<ClientData>(clientEntity);
+        var data = NetworkFactory.DeserializeRequestComponent(componentId, ref reader);
+        
+        if (tick == -1)
+        {
+            clientData.Inputs.Add(new InputData { Tick = -1, Input = data });
+            return;
+        }
+        
+        clientData.InputsWithTick[tick % clientData.InputsWithTick.Length] = new InputData { Tick = tick, Input = data };
     }
 }

@@ -1,34 +1,73 @@
 ﻿using System.Buffers;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using Hypercube.Core.Execution.Timing;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using LiteNetLib;
-using LiteNetLib.Utils;
-using MessagePack;
-using Server;
+using Shared;
 using Shared.Data;
+using Shared.Helpers;
 
 namespace Client;
 
 public class GameClient : INetEventListener
 {
     [Dependency] private readonly ILogger _logger = null!;
+    [Dependency] private readonly ITime _time = null!;
+
+    private const int JitterTick = 3;
     private NetManager _client = null!;
     private NetPeer? _serverPeer;
     public readonly ConcurrentQueue<Packet> Packets = [];
-    private Stopwatch _stopwatch = Stopwatch.StartNew();
     public long Ping { get; private set; }
+    public long LatencyTick { get; private set; }
     private ArrayBufferWriter<byte> _bufferWriter = new();
-    private LatencyProxy _proxy;
+    private readonly LatencyProxy _proxy;
+    private double _timeOffset;
+    private const float TimeSmooth = 0.1f;
+    private const double TickRate = 30;
+    private const double TickMs = 1000.0 / TickRate;
+    public int Id => _serverPeer?.Id ?? -1;
+    public bool Connected => _serverPeer is not null && _serverPeer.ConnectionState == ConnectionState.Connected;
     
     public GameClient()
     {
-        _proxy = new LatencyProxy(this, 50, 150, 20);
+        _proxy = new LatencyProxy(this, 50, 120, 0);
         _client = new NetManager(_proxy);
         _client.UpdateTime = 0;
+    }
+
+    public long GetServerTick()
+    {
+        var localTime = _time.Elapsed.TotalMilliseconds;
+        var synchronizedTime = localTime + _timeOffset;
+        
+        return (long)Math.Floor(synchronizedTime / TickMs);
+    }
+    
+    public double GetServerTickDouble()
+    {
+        var localTime = _time.Elapsed.TotalMilliseconds;
+        var synchronizedTime = localTime + _timeOffset;
+        
+        return synchronizedTime / TickMs;
+    }
+    
+    public double GetLocalTime()
+    {
+        return _time.ElapsedMilliseconds;
+    }
+
+    public long GetPredictServerTick(long currentTick)
+    {
+        return currentTick + LatencyTick + JitterTick;
+    }
+    
+    public long GetServerTime()
+    {
+        return (long)(GetLocalTime() + _timeOffset);
     }
 
     public void Start()
@@ -43,31 +82,46 @@ public class GameClient : INetEventListener
         _client.Connect(ip, port, "DeathBall");
     }
     
-    public void Send(byte[] data, DeliveryMethod deliveryMethod)
+    public void Send(PacketType packetType, byte[] data, DeliveryMethod deliveryMethod)
     {
-        if (_serverPeer is null || _serverPeer.ConnectionState != ConnectionState.Connected) 
+        if (_serverPeer is null || _serverPeer.ConnectionState != ConnectionState.Connected)
+        {
+            _logger.Warning("Server is not connected");
             return;
+        }
+
+        var finalData = new byte[data.Length + 1];
+        finalData[0] = (byte)packetType;
+        Buffer.BlockCopy(data, 0, finalData, 1, data.Length);
         
-        _serverPeer.Send(data, deliveryMethod);
+        _serverPeer.Send(finalData, deliveryMethod);
     }
 
     private void UpdatePing()
     {
-        _bufferWriter.Clear();
-        var writer = new MessagePackWriter(_bufferWriter);
-        writer.Write((byte)PacketType.Ping);
-        writer.WriteInt64(_stopwatch.ElapsedMilliseconds);
-        writer.Flush();
+        if (_serverPeer is null || _serverPeer.ConnectionState != ConnectionState.Connected)
+            return;
         
-        Send(_bufferWriter.WrittenMemory.ToArray(), DeliveryMethod.Unreliable);
+        Span<byte> buffer = stackalloc byte[1 + 8];
+        buffer[0] = (byte)PacketType.Ping;
+        MessagePackHelper.WriteInt64(buffer.Slice(1), (long)GetLocalTime());
+        
+        _serverPeer.Send(buffer.ToArray(), DeliveryMethod.Unreliable);
     }
 
     private async Task ReceivePing()
     {
         while (true)
         {
-            UpdatePing();
-            await Task.Delay(1000);
+            try
+            {
+                UpdatePing();
+                await Task.Delay(1000);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 
@@ -81,28 +135,17 @@ public class GameClient : INetEventListener
         }
     }
 
-    private void HandleIncomingData(byte[] data, DeliveryMethod deliveryType)
+    private void HandleIncomingData(PacketType packetType, long serverTick, byte[] data, DeliveryMethod deliveryType)
     {
-        if (data.Length == 0)
-            return;
-        
-        var packetType = (PacketType)data[0];
-        var payload = new Memory<byte>(data, 1, data.Length - 1);
-
-        if (packetType == PacketType.Ping)
-        {
-            var reader = new MessagePackReader(payload);
-            var current =  _stopwatch.ElapsedMilliseconds;
-            var last = reader.ReadInt64();
-            Ping = current - last;
-            return;
-        }
+        if (deliveryType != DeliveryMethod.Unreliable)
+            _logger.Debug($"Got packet type: {packetType}");
         
         Packets.Enqueue(new Packet
         {
             PacketType = packetType, 
-            Data = payload,
+            Data = new Memory<byte>(data, 0, data.Length),
             DeliveryType = deliveryType,
+            Tick = serverTick
         });
     }
 
@@ -118,16 +161,65 @@ public class GameClient : INetEventListener
 
     public void OnNetworkError(IPEndPoint endPoint, SocketError socketError)
     {
-        throw new NotImplementedException();
     }
 
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
     {
-        var data = reader.GetRemainingBytes();
-        if (data is null || data.Length == 0)
+        if (reader.UserDataSize == 0)
+        {
+            _logger.Warning("Received empty packet");
             return;
+        }
         
-        HandleIncomingData(data, deliveryMethod);
+        var packetType = (PacketType)reader.GetByte();
+
+        if (packetType == PacketType.TimeHydrate)
+        {
+            var serverTime = reader.GetLong();
+            _timeOffset = serverTime - GetLocalTime();
+            return;
+        }
+        
+        if (packetType == PacketType.Ping)
+        {
+            var t1 = GetLocalTime(); // Текущее "сырое" время клиента
+            var clientSentTime = reader.GetLong(); // Время отправки из пакета
+            var serverTime = reader.GetLong(); // Время на сервере
+    
+            // 1. Считаем RTT и задержку в одну сторону
+            var rtt = t1 - clientSentTime;
+            var oneWay = rtt / 2.0;
+    
+            // 2. Вычисляем целевой офсет (каким он должен быть в идеале)
+            // Offset = ServerTime + Latency - LocalTime
+            var targetOffset = (serverTime + oneWay) - t1;
+    
+            // 3. Считаем разницу между текущим офсетом и целевым
+            // _timeOffset ОБЯЗАТЕЛЬНО должен быть double, иначе точности не будет
+            var diff = targetOffset - _timeOffset;
+    
+            // 4. Обновляем пинг для статистики
+            Ping = (long)(Ping * 0.8 + rtt * 0.2);
+            LatencyTick = (long)Math.Floor(oneWay / TickMs);
+
+            // 5. Коррекция
+            // Если разрыв больше 2 тиков (66мс), прыгаем сразу, чтобы не ждать инерцию
+            if (Math.Abs(diff) > 66)
+            {
+                _timeOffset = targetOffset;
+            }
+            else
+            {
+                // Плавно подтягиваемся. Используем double, чтобы не терять остаток от деления
+                _timeOffset += diff / 8.0; 
+            }
+    
+            return;
+        }
+        
+        var serverTick = reader.GetLong();
+        var data = reader.GetRemainingBytes();
+        HandleIncomingData(packetType, serverTick, data, deliveryMethod);
     }
 
     public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)

@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Server.Roslyn;
+namespace Shared.Roslyn;
 
 [Generator]
 public class SyncComponentGenerator : IIncrementalGenerator
@@ -77,7 +77,7 @@ public class SyncComponentGenerator : IIncrementalGenerator
         sb.AppendLine("[MessagePackObject]");
         sb.AppendLine($"public struct {syncDataName}");
         sb.AppendLine("{");
-        for (int i = 0; i < fields.Count; i++)
+        for (var i = 0; i < fields.Count; i++)
         {
             sb.AppendLine($"    [Key({i})]");
             sb.AppendLine($"    public {fields[i].Type.ToDisplayString()} {fields[i].Name.TrimStart('_')};");
@@ -88,6 +88,28 @@ public class SyncComponentGenerator : IIncrementalGenerator
 
         sb.AppendLine($"partial struct {structName} : ISynced");
         sb.AppendLine("{");
+        
+        sb.AppendLine($"    public void ApplyField(string fieldName, in {syncDataName} data)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        switch (fieldName)");
+        sb.AppendLine("        {");
+
+        foreach (var field in fields)
+        {
+            var name = field.Name;
+            var cleanName = name.TrimStart('_');
+            
+            sb.AppendLine($"            case \"{name}\":");
+            if (name != cleanName) sb.AppendLine($"            case \"{cleanName}\":");
+        
+            GenerateFieldAssignment(sb, field, "data", "                ");
+            sb.AppendLine("                break;");
+        }
+
+        sb.AppendLine("            default:");
+        sb.AppendLine("                throw new ArgumentException($\"Field {fieldName} not found\");");
+        sb.AppendLine("        }");
+        sb.AppendLine("    }");
 
         // Метод сериализации
         sb.AppendLine($"    [MethodImpl(MethodImplOptions.AggressiveInlining)]");
@@ -98,9 +120,9 @@ public class SyncComponentGenerator : IIncrementalGenerator
         sb.AppendLine("        {");
         foreach (var field in fields)
         {
-            string name = field.Name;
-            string cleanName = name.TrimStart('_');
-            string val = field.Type.ToDisplayString().Contains("List<") ? $"this.{name}?.ToArray()" : $"this.{name}";
+            var name = field.Name;
+            var cleanName = name.TrimStart('_');
+            var val = field.Type.ToDisplayString().Contains("List<") ? $"this.{name}?.ToArray()" : $"this.{name}";
             sb.AppendLine($"            {cleanName} = {val},");
         }
 
@@ -115,9 +137,9 @@ public class SyncComponentGenerator : IIncrementalGenerator
         
         foreach (var field in fields)
         {
-            string name = field.Name;
-            string cleanName = name.TrimStart('_');
-            string fieldType = field.Type.ToDisplayString();
+            var name = field.Name;
+            var cleanName = name.TrimStart('_');
+            var fieldType = field.Type.ToDisplayString();
 
             if (fieldType.Contains("List<"))
             {
@@ -136,6 +158,21 @@ public class SyncComponentGenerator : IIncrementalGenerator
         spc.AddSource($"{structName}_SyncGenerated.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
     }
 
+    private static void GenerateFieldAssignment(StringBuilder sb, IFieldSymbol field, string sourceName, string indent = "        ")
+    {
+        var name = field.Name;
+        var cleanName = name.TrimStart('_');
+        var fieldType = field.Type.ToDisplayString();
+
+        if (fieldType.Contains("List<"))
+        {
+            sb.AppendLine($"{indent}this.{name} = {sourceName}.{cleanName} != null ? new {fieldType}({sourceName}.{cleanName}) : null;");
+        }
+        else
+        {
+            sb.AppendLine($"{indent}this.{name} = {sourceName}.{cleanName};");
+        }
+    }
 
     private readonly struct StructSymbolContext
     {

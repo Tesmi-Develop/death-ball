@@ -7,35 +7,32 @@ namespace Server.Systems.Network;
 
 public class ClientConnection
 {
-    private readonly NetPeer _peer;
-    public readonly ConcurrentQueue<byte[]> IncomingPackets = new();
+    public readonly NetPeer Peer;
+    public readonly ConcurrentQueue<Packet> IncomingPackets = new();
 
     public ClientConnection(NetPeer peer)
     {
-        _peer = peer;
+        Peer = peer;
     }
 
     public void Send(byte[] data, DeliveryMethod deliveryMethod)
     {
-        if (_peer.ConnectionState != ConnectionState.Connected) 
+        if (Peer.ConnectionState != ConnectionState.Connected)
             return;
-        
-        _peer.Send(data, deliveryMethod);
+
+        Peer.Send(data, deliveryMethod);
     }
     
-    public void OnPacketReceive(NetDataReader reader)
+    public void OnPacketReceive(NetDataReader reader, PacketType packetType)
     {
-        var packetType = (PacketType)reader.PeekByte();
-        var packet = reader.GetRemainingBytes();
-        if (packet is null || packet.Length == 0)
+        var data = reader.GetRemainingBytes();
+        if (data is null)
             return;
         
-        if (packetType == PacketType.Ping)
+        IncomingPackets.Enqueue(new Packet
         {
-            Send(packet, DeliveryMethod.Unreliable);
-            return;
-        }
-        
-        IncomingPackets.Enqueue(packet); 
+            PacketType = packetType, 
+            Data= new Memory<byte>(data, 0, data.Length),
+        });
     }
 }

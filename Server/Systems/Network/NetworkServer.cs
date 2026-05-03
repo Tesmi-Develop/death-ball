@@ -6,6 +6,9 @@ using Hypercube.Utilities.Dependencies;
 using LiteNetLib;
 using Server.Components.Events;
 using Server.Events;
+using Server.Utilities;
+using Shared.Data;
+using Shared.Helpers;
 
 namespace Server.Systems.Network;
 
@@ -14,14 +17,20 @@ public class NetworkServer : BaseSystem, INetEventListener
 {
     [Dependency] private readonly IEventBus _eventBus = null!;
     [Dependency] private readonly ILogger _logger = null!;
+    [Dependency] private readonly Time _time = null!;
+    
     private readonly NetManager _server;
     private readonly ConcurrentDictionary<NetPeer, ClientConnection> _connections = [];
     private readonly ConcurrentQueue<IEvent> _eventQueue = [];
-        
+
     public NetworkServer()
     {
         _server = new NetManager(this);
-        _server.UpdateTime = 0;
+    }
+
+    public long GetServerTime()
+    {
+        return _time.Stopwatch.ElapsedMilliseconds;
     }
 
     public override void Initialize()
@@ -29,9 +38,10 @@ public class NetworkServer : BaseSystem, INetEventListener
         const int port = 5000;
         _server.Start(port);
         _ = ReceiveCycle();
+        _logger.Info($"Server started on port {port}");
     }
 
-    public override void Update(float deltaTime)
+    public override void Update(long tick)
     {
         while (_eventQueue.TryDequeue(out var eventInstance))
             _eventBus.Raise(eventInstance);
@@ -51,6 +61,12 @@ public class NetworkServer : BaseSystem, INetEventListener
         var newConnection = new ClientConnection(peer);
         _connections.TryAdd(peer, newConnection);
         _eventQueue.Enqueue(new ClientConnected { ClientConnection = newConnection });
+        
+        Span<byte> buffer = stackalloc byte[1 + 8];
+        buffer[0] = (byte)PacketType.TimeHydrate;
+        MessagePackHelper.WriteInt64(buffer.Slice(1), GetServerTime());
+        
+        peer.Send(buffer.ToArray(), DeliveryMethod.ReliableOrdered);
         _logger.Info($"New client connected {peer.Address}:{peer.Port}");
     }
 
@@ -70,9 +86,44 @@ public class NetworkServer : BaseSystem, INetEventListener
 
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
     {
-        if (_connections.TryGetValue(peer, out var clientConnection))
-            clientConnection.OnPacketReceive(reader);
-    
+        if (!_connections.TryGetValue(peer, out var client) || reader.AvailableBytes < 1)
+        {
+            reader.Recycle();
+            return;
+        }
+
+        var type = (PacketType)reader.GetByte();
+
+        switch (type)
+        {
+            case PacketType.Ping:
+            {
+                if (reader.AvailableBytes < 8)
+                {
+                    reader.Recycle();
+                    return;
+                }
+
+                var clientSendTime = reader.GetLong();
+                var serverTime = GetServerTime();
+
+                // response packet: [type][clientTime][serverTime]
+                Span<byte> buffer = stackalloc byte[1 + 8 + 8];
+
+                buffer[0] = (byte)PacketType.Ping;
+
+                MessagePackHelper.WriteInt64(buffer.Slice(1), clientSendTime);
+                MessagePackHelper.WriteInt64(buffer.Slice(9), serverTime);
+
+                client.Send(buffer.ToArray(), DeliveryMethod.Unreliable);
+                break;
+            }
+
+            default:
+                client.OnPacketReceive(reader, type);
+                break;
+        }
+
         reader.Recycle();
     }
 

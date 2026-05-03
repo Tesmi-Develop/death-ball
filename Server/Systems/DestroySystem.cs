@@ -13,7 +13,7 @@ public class DestroySystem : BaseSystem
         _query = new QueryDescription().WithAll<DestroyTag>();
     }
 
-    public override void AfterUpdate(float deltaTime)
+    public override void AfterUpdate(long tick)
     {
         world.Query(in _query, entity =>
         {

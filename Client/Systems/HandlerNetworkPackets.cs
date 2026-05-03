@@ -1,5 +1,6 @@
 ﻿using Client.Events;
 using Hypercube.Core.Ecs;
+using Hypercube.Core.Execution.LifeCycle;
 using Hypercube.Utilities.Dependencies;
 using Shared.Data;
 
@@ -11,7 +12,7 @@ public class HandlerNetworkPackets : EntitySystem
     private const int MaxPacketPerUpdate = 60;
     private List<Packet> _packetBuffer = new(128);
 
-    public override void Update(float deltaTime)
+    public override void Update(FrameEventArgs deltaTime)
     {
         var counter = 0;
 

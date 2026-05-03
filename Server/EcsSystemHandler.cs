@@ -54,11 +54,18 @@ public class EcsSystemHandler
                 continue;
             }
             
+            _logger.Trace($"Found system: {type.Name}");
             _dependenciesContainer.Register(type);
             priorities.Add((type, attributeData.Priority));
         }
         
-        var systems = _dependenciesContainer.ResolveAll();
+        _dependenciesContainer.ResolveAll();
+        
+        var systems = new List<BaseSystem>();
+
+        foreach (var (type, _) in priorities)
+            systems.Add((BaseSystem)_dependenciesContainer.Resolve(type));
+        
         return systems
             .OrderBy(e =>
             {
@@ -74,6 +81,7 @@ public class EcsSystemHandler
         foreach (var system in _systems)
         {
             system.PreInitialize();
+            _logger.Trace($"Pre initialized system: {system.GetType().Name}");
         }
     }
     
@@ -82,6 +90,7 @@ public class EcsSystemHandler
         foreach (var system in _systems)
         {
             system.Initialize();
+            _logger.Trace($"Initialized system: {system.GetType().Name}");
         }
     }
     
@@ -90,37 +99,38 @@ public class EcsSystemHandler
         foreach (var system in _systems)
         {
             system.PostInitialize();
+            _logger.Trace($"Post initialized system: {system.GetType().Name}");
         }
     }
 
-    public void InvokeBeforeUpdate(float deltaTime)
+    public void InvokeBeforeUpdate(long tick)
     {
         foreach (var system in _systems)
         {
-            system.BeforeUpdate(deltaTime);
+            system.BeforeUpdate(tick);
         }
     }
     
-    public void InvokeUpdate(float deltaTime)
+    public void InvokeUpdate(long tick)
     {
         foreach (var system in _systems)
         {
-            system.Update(deltaTime);
+            system.Update(tick);
         }
     }
     
-    public void InvokeAfterUpdate(float deltaTime)
+    public void InvokeAfterUpdate(long tick)
     {
         foreach (var system in _systems)
         {
-            system.AfterUpdate(deltaTime);
+            system.AfterUpdate(tick);
         }
     }
 
-    public void InvokeUpdateCycle(float deltaTime)
+    public void InvokeUpdateCycle(long tick)
     {
-        InvokeBeforeUpdate(deltaTime);
-        InvokeUpdate(deltaTime);
-        InvokeAfterUpdate(deltaTime);
+        InvokeBeforeUpdate(tick);
+        InvokeUpdate(tick);
+        InvokeAfterUpdate(tick);
     }
 }

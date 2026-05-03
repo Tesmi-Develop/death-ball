@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Collections.Concurrent;
 using Arch.Core;
 using Server.Extensions;
 using Hypercube.Utilities.Debugging.Logger;
@@ -24,10 +25,11 @@ public class SyncSystem : BaseSystem
     private readonly QueryDescription _clientQuery = new QueryDescription().WithAll<ClientData>();
     private readonly QueryDescription _syncQuery = new QueryDescription().WithAll<NetworkEntityTag>();
     private readonly ArrayBufferWriter<byte> _bufferWriter = new(1024); 
-    private readonly List<(Entity entity, int NetId)> _removalQueue = [];
-    private readonly List<(Entity entity, int NetId)> _additionalQueue = [];
-    private readonly HashSet<long> _destroyedEntities = [];
+    private readonly ConcurrentQueue<(Entity entity, int NetId)> _removalQueue = [];
+    private readonly ConcurrentQueue<(Entity entity, int NetId)> _additionalQueue = [];
+    private readonly ConcurrentQueue<long> _destroyedEntities = [];
     private readonly List<Entity> _tempEntityList = [];
+    private readonly ArrayBufferWriter<byte> _tempBuffer = new ArrayBufferWriter<byte>(1024);
     
     private void RegisterRemovalHook<T>(int netId) where T : struct
     {
@@ -36,7 +38,7 @@ public class SyncSystem : BaseSystem
 
         void Handler(in Entity entity, ref T comp) 
         {
-            _removalQueue.Add((entity, netId));
+            _removalQueue.Enqueue((entity, netId));
         }
     }
     
@@ -48,7 +50,7 @@ public class SyncSystem : BaseSystem
         void Handler(in Entity entity, ref T comp) 
         {
             world.Add<NetworkEntityTag>(entity);
-            _additionalQueue.Add((entity, netId));
+            _additionalQueue.Enqueue((entity, netId));
         }
     }
 
@@ -73,7 +75,7 @@ public class SyncSystem : BaseSystem
         
         world.SubscribeComponentRemoved((in Entity entity, ref NetworkEntityTag _) =>
         {
-            _destroyedEntities.Add(entity.GetFullMask());
+            _destroyedEntities.Enqueue(entity.GetFullMask());
         });
         
         _eventBus.Subscribe((Entity _, ref ClientData playerData, ref NewEntityClient _) =>
@@ -120,80 +122,108 @@ public class SyncSystem : BaseSystem
         clientData.PendingPackets.Enqueue(packet);
     }
 
-    public override void Update(float deltaTime)
+    public override void AfterUpdate(long tick)
     {
         _bufferWriter.Clear();
         
         SerializeDestroyedEntities();
-        BroadcastSyncPacket(PacketType.EntitiesDeletion, DeliveryMethod.ReliableOrdered);
+        BroadcastSyncPacket(PacketType.EntitiesDeletion, DeliveryMethod.ReliableOrdered, tick);
         _bufferWriter.Clear();
         
         SerializeRemovedComponents();
-        BroadcastSyncPacket(PacketType.ComponentsDeletion, DeliveryMethod.ReliableOrdered);
+        BroadcastSyncPacket(PacketType.ComponentsDeletion, DeliveryMethod.ReliableOrdered, tick);
         _bufferWriter.Clear();
         
         SerializeAddedComponents();
-        BroadcastSyncPacket(PacketType.ComponentsAddition, DeliveryMethod.ReliableOrdered);
+        BroadcastSyncPacket(PacketType.ComponentsAddition, DeliveryMethod.ReliableOrdered, tick);
         _bufferWriter.Clear();
         
         SerializeDirtyChanges();
-        BroadcastSyncPacket(PacketType.Dirty, DeliveryMethod.Unreliable);
+        BroadcastSyncPacket(PacketType.Dirty, DeliveryMethod.Unreliable, tick);
         _bufferWriter.Clear();
     }
 
     private void SerializeDestroyedEntities()
     {
-        if (_destroyedEntities.Count <= 0)
+        var actualCount = 0;
+        var writer = new MessagePackWriter(_tempBuffer);
+        
+        while (_destroyedEntities.TryDequeue(out var mask))
+        {
+            writer.WriteInt64(mask);
+            actualCount++;
+        }
+
+        writer.Flush();
+
+        if (actualCount <= 0) 
             return;
         
-        MessagePackSerializer.Serialize(_bufferWriter, _destroyedEntities.Count);
-        foreach (var mask in _destroyedEntities)
-            MessagePackSerializer.Serialize(_bufferWriter, mask);
-        
-        _destroyedEntities.Clear();
+        _bufferWriter.Clear();
+        MessagePackSerializer.Serialize(_bufferWriter, actualCount);
+        _bufferWriter.Write(_tempBuffer.WrittenSpan);
     }
 
     private void SerializeRemovedComponents()
     {
-        var actualCount = _removalQueue.Count(r => world.IsAlive(r.entity));
-        if (actualCount <= 0)
-            return;
-        
-        MessagePackSerializer.Serialize(_bufferWriter, actualCount);
-        foreach (var (entity, netId) in _removalQueue)
+        _tempBuffer.Clear();
+        var writer = new MessagePackWriter(_tempBuffer);
+    
+        var actualCount = 0;
+        while (_removalQueue.TryDequeue(out var result))
         {
+            var (entity, netId) = result;
             if (!world.IsAlive(entity)) 
                 continue;
-            
-            MessagePackSerializer.Serialize(_bufferWriter, entity.GetFullMask());
-            MessagePackSerializer.Serialize(_bufferWriter, netId);
+
+            writer.WriteInt64(entity.GetFullMask());
+            writer.WriteInt32(netId);
+            actualCount++;
         }
         
-        _removalQueue.Clear();
+        writer.Flush();
+
+        if (actualCount <= 0) 
+            return;
+        
+        _bufferWriter.Clear();
+        MessagePackSerializer.Serialize(_bufferWriter, actualCount);
+        _bufferWriter.Write(_tempBuffer.WrittenSpan);
     }
     
     private void SerializeAddedComponents()
     {
-        var actualCount = _additionalQueue.Count(r => world.IsAlive(r.entity));
-        if (actualCount <= 0)
-            return;
+        _tempBuffer.Clear();
+        var writer = new MessagePackWriter(_tempBuffer);
         
-        MessagePackSerializer.Serialize(_bufferWriter, actualCount);
+        var actualCount = 0;
         
-        foreach (var (entity, netId) in _additionalQueue)
+        while (_additionalQueue.TryDequeue(out var result))
         {
+            var (entity, netId) = result;
             if (!world.IsAlive(entity)) 
                 continue;
-            
-            MessagePackSerializer.Serialize(_bufferWriter, entity.GetFullMask());
-            MessagePackSerializer.Serialize(_bufferWriter, netId);
+
+            writer.WriteInt64(entity.GetFullMask());
+            writer.WriteInt32(netId);
+            writer.Flush();
             
             var componentType = NetworkHelper.GetNetworkComponentById(world, netId);
             var synced = (ISynced)world.Get(entity, componentType)!;
-            synced.Serialize(_bufferWriter, null);
+            synced.Serialize(_tempBuffer, null);
+            writer = new MessagePackWriter(_tempBuffer);
+            
+            actualCount++;
         }
         
-        _additionalQueue.Clear();
+        writer.Flush();
+        
+        if (actualCount <= 0) 
+            return;
+        
+        _bufferWriter.Clear();
+        MessagePackSerializer.Serialize(_bufferWriter, actualCount);
+        _bufferWriter.Write(_tempBuffer.WrittenSpan);
     }
 
     private void SerializeDirtyChanges()
@@ -229,7 +259,7 @@ public class SyncSystem : BaseSystem
             world.Remove<Dirty>(e);
     }
 
-    private void BroadcastSyncPacket(PacketType packetType, DeliveryMethod deliveryType)
+    private void BroadcastSyncPacket(PacketType packetType, DeliveryMethod deliveryType, long tick)
     {
         if (_bufferWriter.WrittenCount <= 3) 
             return;
@@ -238,9 +268,10 @@ public class SyncSystem : BaseSystem
         {
             PacketType = packetType,
             DeliveryType = deliveryType,
-            Data = _bufferWriter.WrittenSpan.ToArray() 
+            Data = _bufferWriter.WrittenSpan.ToArray(),
+            Tick = tick
         };
-
+        
         PushAllClientsSyncData(packet);
     }
 

@@ -1,11 +1,9 @@
 ﻿using System.Text;
-using Hypercube.Core.Graphics.Patching;
 using Hypercube.Core.Graphics.Rendering;
 using Hypercube.Core.Graphics.Rendering.Context;
 using Hypercube.Core.Graphics.Resources;
 using Hypercube.Core.Resources;
 using Hypercube.Core.Systems;
-using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics;
 using Hypercube.Mathematics.Vectors;
 using Hypercube.Utilities.Dependencies;

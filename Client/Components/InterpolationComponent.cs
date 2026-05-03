@@ -5,7 +5,7 @@ namespace Client.Components;
 
 public struct InterpolationComponent : IComponent
 {
-    public Queue<(float Time, Vector2 Position)> Snapshots = new();
+    public Queue<(long Tick, Vector2 Position)> Snapshots = new();
     public float ClientInterpolationTime = 0; // Наше внутреннее "время прошлого"
     public Vector2 LastPosition = Vector2.Zero;
 

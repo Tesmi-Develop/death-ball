@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using LiteNetLib;
 
-namespace Server;
+namespace Shared;
 
 public class LatencyProxy : INetEventListener
 {
@@ -77,7 +77,7 @@ public class LatencyProxy : INetEventListener
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
     {
         // Симуляция потери пакетов
-        if (_enablePacketLoss && _random.Next(100) < _packetLossChance)
+        if (_enablePacketLoss && deliveryMethod == DeliveryMethod.Unreliable && _random.Next(100) < _packetLossChance)
         {
             reader.Recycle();
             return;

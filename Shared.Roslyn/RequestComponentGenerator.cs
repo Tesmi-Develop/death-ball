@@ -58,12 +58,25 @@ public class RequestComponentGenerator : IIncrementalGenerator
 
         foreach (var field in fields)
         {
-            string readCall = GetReadMethod(field.Type);
+            var readCall = GetReadMethod(field.Type);
             sb.AppendLine($"        result.{field.Name} = {readCall};");
         }
 
         sb.AppendLine("        return result;");
         sb.AppendLine("    }");
+        
+        sb.AppendLine($"    public static void Serialize(ref MessagePackWriter writer, {structName} request)");
+        sb.AppendLine("    {");
+        fields = info.Symbol.GetMembers().OfType<IFieldSymbol>()
+            .Where(f => f.DeclaredAccessibility == Accessibility.Public);
+
+        foreach (var field in fields)
+        {
+            sb.AppendLine($"        {GetWriteMethod(field.Type, $"request.{field.Name}")};");
+        }
+        
+        sb.AppendLine("    }");
+        
         sb.AppendLine("}");
 
         context.AddSource($"{structName}.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
@@ -78,6 +91,18 @@ public class RequestComponentGenerator : IIncrementalGenerator
             SpecialType.System_Boolean => "reader.ReadBoolean()",
             SpecialType.System_String => "reader.ReadString()",
             _ => $"MessagePackSerializer.Deserialize<{type.ToDisplayString()}>(ref reader)"
+        };
+    }
+    
+    private static string GetWriteMethod(ITypeSymbol type, string valueExpression)
+    {
+        return type.SpecialType switch
+        {
+            SpecialType.System_Int32 => $"writer.WriteInt32({valueExpression})",
+            SpecialType.System_Single => $"writer.WriteSingle({valueExpression})",
+            SpecialType.System_Boolean => $"writer.WriteBoolean({valueExpression})",
+            SpecialType.System_String => $"writer.WriteString({valueExpression})",
+            _ => $"MessagePackSerializer.Serialize(ref writer, {valueExpression})"
         };
     }
 

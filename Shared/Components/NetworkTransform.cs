@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Hypercube.Ecs.Components;
 using Hypercube.Mathematics.Vectors;
 using Shared.Attributes;
@@ -5,11 +6,12 @@ using Shared.Attributes;
 namespace Shared.Components;
 
 [SyncComponent]
-public partial struct Transform : IComponent
+[StructLayout(LayoutKind.Sequential)]
+public partial struct NetworkTransform : IComponent
 {
     public Vector2 Position = Vector2.Zero;
 
-    public Transform()
+    public NetworkTransform()
     {
     }
 }

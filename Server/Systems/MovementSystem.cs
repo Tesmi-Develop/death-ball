@@ -1,5 +1,6 @@
 using Arch.Core;
 using Server.Components;
+using Server.Helpers;
 using Shared.Components;
 using Shared.Components.Commands;
 
@@ -12,27 +13,31 @@ public class MovementSystem : BaseSystem
 
     public override void Initialize()
     {
-        _query = new QueryDescription().WithAll<FromClient, MoveRequest>();
+        _query = new QueryDescription().WithAll<ClientData>();
     }
 
-    public override void Update(float deltaTime)
+    public override void Update(long tick)
     {
-        world.Query(in _query, (Entity _, ref FromClient fromClient, ref MoveRequest moveRequest) =>
+        world.Query(in _query, (Entity clientEntity, ref ClientData clientData) =>
         {
-            if (!world.Has<ControlledEntity>(fromClient.PlayerEntity))
+            if (!world.Has<ControlledEntity>(clientEntity))
                 return;
             
-            var characterEntity = world.Get<ControlledEntity>(fromClient.PlayerEntity).Reference;
+            var characterEntity = world.Get<ControlledEntity>(clientEntity).Reference;
             if (!world.IsAlive(characterEntity))
                 return;
-            
-            if (
-                !world.TryGet<Transform>(characterEntity, out var transform) || 
-                !world.TryGet<Speed>(characterEntity, out var speed)
-                )
+
+            if (!NetworkHelper.TryGetInputFromTick<MoveRequest>(world, clientEntity, tick, out var inputData))
                 return;
             
-            transform.Position += moveRequest.Direction * speed.Value;
+            ref var transform = ref world.TryGetRef<NetworkTransform>(characterEntity, out var hasTransform);
+            ref var speed = ref world.TryGetRef<Speed>(characterEntity, out var hasSpeed);
+            
+            if (!hasTransform || !hasSpeed)
+                return;
+            
+            transform.Position += inputData.Direction * speed.Value;
+            NetworkHelper.MakeDirty<NetworkTransform>(world, characterEntity);
         });
     }
 }

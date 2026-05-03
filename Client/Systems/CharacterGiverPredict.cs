@@ -1,0 +1,27 @@
+﻿using Client.Systems.PredictSystems;
+using Hypercube.Core.Ecs;
+using Hypercube.Core.Execution.LifeCycle;
+using Hypercube.Ecs.Queries;
+using Hypercube.Utilities.Dependencies;
+using Shared.Components;
+
+namespace Client.Systems;
+
+public class CharacterGiverPredict : EntitySystem
+{
+    [Dependency] private readonly PredictHelper _predictHelper = null!;
+    private Query _query = null!;
+
+    public override void Initialize()
+    {
+        _query = GetQuery().WithAll<NetworkTransform, PlayerCharacter>().WithNone<EntityHistory>().Build();
+    }
+
+    public override void Update(FrameEventArgs args)
+    {
+        _query.With<NetworkTransform>((entity, ref transform) =>
+        {
+            _predictHelper.PredictField<NetworkTransform>(entity, nameof(NetworkTransform.Position));
+        });
+    }
+}

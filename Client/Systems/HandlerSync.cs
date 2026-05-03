@@ -1,4 +1,5 @@
 ﻿using Client.Events;
+using Client.Systems.PredictSystems;
 using Hypercube.Core.Ecs;
 using Hypercube.Ecs;
 using Hypercube.Utilities.Debugging.Logger;
@@ -10,7 +11,9 @@ namespace Client.Systems;
 
 public class HandlerSync : EntitySystem
 {
+    [Dependency] private readonly GameClient _gameClient = null!;
     [Dependency] private readonly ILogger _logger = null!;
+    [Dependency] private readonly ServerUpdateHandlerSystem _serverUpdateHandlerSystem = null!;
     private readonly Dictionary<long, Entity> _networkEntitiesById = [];
     private readonly Dictionary<Entity, long> _networkEntitiesByEntity = [];
     
@@ -24,21 +27,10 @@ public class HandlerSync : EntitySystem
         switch (args.Packet.PacketType)
         {
             case PacketType.Hydrate:
-                try
-                {
-                    DoHydrate(args.Packet.Data);
-                }
-                catch (Exception e)
-                {
-                    var decimalData = string.Join(", ", args.Packet.Data.ToArray());
-
-                    _logger.Error($"Hydrate Error: {e.Message}");
-                    _logger.Error($"Packet Length: {args.Packet.Data.Length} bytes");
-                    _logger.Error($"Data (dec): [{decimalData}]");
-                }
+                DoHydrate(args.Packet.Data);
                 break;
             case PacketType.Dirty:
-                DoDirty(args.Packet.Data);
+                DoDirty(args.Packet.Data, args.Packet.Tick);
                 break;
             case PacketType.EntitiesDeletion:
                 DoEntitiesDeletion(args.Packet.Data);
@@ -80,7 +72,7 @@ public class HandlerSync : EntitySystem
         }
     }
 
-    private void DoDirty(ReadOnlyMemory<byte> payload)
+    private void DoDirty(ReadOnlyMemory<byte> payload, long packetServerTick)
     {
         var reader = new MessagePackReader(payload);
         var entityCounts = reader.ReadInt32();
@@ -102,10 +94,13 @@ public class HandlerSync : EntitySystem
             {
                 var componentId = reader.ReadInt32();
                 var componentData = payload[(int)reader.Consumed..];
-                
-                if (!skipDirty) 
-                    NetworkFactory.PatchComponentFromPayload(componentId, entity, World, componentData);
-                
+
+                if (!skipDirty)
+                {
+                    NetworkFactory.PatchComponentFromPayload(componentId, entity, World, packetServerTick, componentData);
+                    _serverUpdateHandlerSystem.ReconcileState(entity);
+                }
+
                 reader.Skip();
             }
         }

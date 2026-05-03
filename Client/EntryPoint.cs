@@ -2,6 +2,7 @@
 using Hypercube.Core.Ecs;
 using Hypercube.Core.Execution.Attributes;
 using Hypercube.Core.Execution.Enums;
+using Hypercube.Core.Execution.Timing;
 using Hypercube.Core.Graphics.Patching;
 using Hypercube.Core.Resources;
 using Hypercube.Core.UI;
@@ -30,6 +31,8 @@ public static class EntryPoint
         var uiManager = container.Resolve<IUIManager>();
         var resourceManager = container.Resolve<IResourceManager>();
         var gameClient = container.Resolve<GameClient>();
+
+        var time = container.Resolve<ITime>();
         
         /*var sound = resourceManager.Load<Audio>("/audio/game_boi_3.wav");
         var source = audio.CreateSource(sound);
@@ -37,12 +40,17 @@ public static class EntryPoint
         source.Start();*/
         
         gameClient.Start();
-        gameClient.ConnectAsync("127.0.0.1", 5000).ContinueWith(task =>
+
+        while (!gameClient.Connected)
         {
-            if (task.IsFaulted)
+            gameClient.ConnectAsync("127.0.0.1", 5000).ContinueWith(task =>
             {
-                logger.Error(task.Exception);
-            }
-        });
+                if (task.IsFaulted)
+                {
+                    logger.Error(task.Exception);
+                }
+            });
+            Thread.Sleep(1000);
+        }
     }
 }

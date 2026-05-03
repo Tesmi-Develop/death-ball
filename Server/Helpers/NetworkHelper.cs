@@ -1,6 +1,7 @@
 using Arch.Core;
 using Server.Extensions;
 using Server.Components;
+using Shared.Data;
 
 namespace Server.Helpers;
 
@@ -44,5 +45,41 @@ public static class NetworkHelper
     {
         var networkComponents = GetNetworkComponentMetadata(world);
         return networkComponents.ComponentsById[id];
+    }
+
+    public static List<InputData> GetInputData<T>(World world, Entity clientEntity)
+    {
+        if (!world.Has<ClientData>(clientEntity))
+            throw new ArgumentException("Entity is not client");
+
+        var clientData = world.Get<ClientData>(clientEntity);
+        var inputs = new List<InputData>();
+
+        foreach (var inputData in clientData.Inputs)
+        {
+            if (inputData.Input is T)
+            {
+                inputs.Add(inputData);
+            }
+        }
+
+        return inputs;
+    }
+
+    public static bool TryGetInputFromTick<T>(World world, Entity clientEntity, long tick, out T? input)
+    {
+        input = default(T);
+        
+        if (!world.Has<ClientData>(clientEntity))
+            throw new ArgumentException("Entity is not client");
+
+        ref var clientData = ref world.Get<ClientData>(clientEntity);
+
+        var inputData = clientData.InputsWithTick[tick % clientData.InputsWithTick.Length];
+        if (inputData.Tick != tick)
+            return false;
+        
+        input = (T)inputData.Input;
+        return true;
     }
 }

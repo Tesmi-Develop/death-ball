@@ -1,4 +1,3 @@
-using System.Xml.XPath;
 using Arch.Core;
 using Hypercube.Mathematics;
 using Hypercube.Mathematics.Random;
@@ -8,6 +7,7 @@ using Hypercube.Utilities.Dependencies;
 using Server.Components;
 using Server.Events;
 using Server.Helpers;
+using Server.Utilities;
 using Shared.Components;
 
 namespace Server.Systems;
@@ -16,22 +16,29 @@ namespace Server.Systems;
 public class TestSystem : BaseSystem
 {
     [Dependency] private readonly IEventBus _eventBus = null!;
+    [Dependency] private readonly Time _time = null!;
     private Rect2 _arenaSize = new Rect2(-200, 200, 200, -200);
     private Xoshiro256 _random = new(new Random().Next());
     private QueryDescription _query;
     private QueryDescription _query2;
-    private float _speed = .1f;
+    private float _speed = 5;
     private int counter = 0;
     
     public override void PostInitialize()
     {
-        for (int i = 0; i < 10; i++)
+        Task.Run(async () =>
         {
-            var entity2 = world.Create();
-            world.Add(entity2, new Transform() { Position = Vector2.One });
-            world.Add(entity2, new TargetLocation() { Location = Vector2.One });
-        }
-        _query = new QueryDescription().WithAll<Transform, TargetLocation>();
+            await Task.Delay(5000);
+            Console.WriteLine("Start test");
+            for (var i = 0; i < 1; i++)
+            {
+                var entity2 = world.Create();
+                world.Add(entity2, new NetworkTransform() { Position = Vector2.One });
+                world.Add(entity2, new TargetLocation() { Location = Vector2.One });
+            }
+        });
+ 
+        _query = new QueryDescription().WithAll<NetworkTransform, TargetLocation>();
     }
 
     private Vector2 GetRandomPosition()
@@ -40,20 +47,20 @@ public class TestSystem : BaseSystem
         return newPoint;
     }
 
-    public override void Update(float deltaTime)
+    public override void Update(long tick)
     {
-        world.Query(in _query, (Entity entity, ref Transform transform, ref TargetLocation location) =>
+        world.Query(in _query, (Entity entity, ref NetworkTransform networkTransform, ref TargetLocation location) =>
         {
-            if ((location.Location - transform.Position).Length <= 10)
+            if ((location.Location - networkTransform.Position).Length <= 10)
             {
                 location.Location = GetRandomPosition();
             }
 
-            transform.Position = new Vector2(
-                HyperMath.MoveTowards(transform.Position.X, location.Location.X, deltaTime * _speed), 
-                HyperMath.MoveTowards(transform.Position.Y, location.Location.Y, deltaTime * _speed));
+            networkTransform.Position = new Vector2(
+                HyperMath.MoveTowards(networkTransform.Position.X, location.Location.X, _speed), 
+                HyperMath.MoveTowards(networkTransform.Position.Y, location.Location.Y, _speed));
             
-            NetworkHelper.MakeDirty<Transform>(world, entity);
+            NetworkHelper.MakeDirty<NetworkTransform>(world, entity);
         });
     }
 }

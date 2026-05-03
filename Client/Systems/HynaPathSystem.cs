@@ -6,7 +6,6 @@ using Hypercube.Core.Systems.Transform;
 using Hypercube.Ecs;
 using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics;
-using StbTrueTypeSharp;
 
 namespace Client.Systems;
 
@@ -16,14 +15,12 @@ public class HynaPathSystem : PatchEntitySystem
     
     public override void Initialize()
     {
-        base.Initialize();
-
         _query = GetQuery().WithAll<SpriteComponent, TransformComponent>().Build();
     }
 
     public override void Draw(IRenderContext renderer, DrawPayload payload)
     {
-        Entity past = Entity.Invalid;
+        var past = Entity.Invalid;
         
         _query.With<TransformComponent, SpriteComponent>((entity, ref transform, ref sprite) =>
         {
