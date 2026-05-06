@@ -1,4 +1,7 @@
 ﻿using Arch.Core;
+using Hypercube.Core;
+using Hypercube.Core.Resources;
+using Hypercube.Physics;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using Server.Events;
@@ -9,14 +12,26 @@ namespace Server;
 
 public static class Program
 {
-    public static readonly int TickRate = 30;
+    private static readonly int TickRate = 60;
+
+    private static void InitResourceManager(DependenciesContainer dependenciesContainer)
+    {
+        var instance = new ResourceManager();
+        dependenciesContainer.RegisterSingleton<IResourceManager>(instance);
+        instance.AddAllLoaders();
+        instance.Mount(Config.MountFolders);
+    }
     
     public static void Main()
     {
+        var dependenciesContainer = new DependenciesContainer();
+        
+        Contacts.Initialize();
         MessagePackHelper.SetupMessagePack();
+        InitResourceManager(dependenciesContainer);
+        
         var logger = new ConsoleLogger();
         var world = World.Create();
-        var dependenciesContainer = new DependenciesContainer();
         var eventBus = new EventBus();
         var time = new Time();
         

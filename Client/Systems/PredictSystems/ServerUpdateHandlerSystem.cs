@@ -22,14 +22,14 @@ public class ServerUpdateHandlerSystem : EntitySystem
     private readonly List<IServerUpdate> _serverUpdates = [];
     private bool _needRollback;
     private long _lastTick;
-    private long _lastPredictTick;
+    private long _lastProcessedPredictTick;
     private long _missPredictTick = long.MaxValue;
     public long PredictTick { get; private set; } = 0;
     public bool IsRollback { get; private set; } = false;
 
     public override void Initialize()
     {
-        _query = GetQuery().WithAll<EntityHistory>().Build();
+        _query = GetQuery().WithAll<EntityPredictHistory>().Build();
         
         var interfaceType = typeof(IServerUpdate);
         var types = AppDomain.CurrentDomain.GetAssemblies()
@@ -52,6 +52,7 @@ public class ServerUpdateHandlerSystem : EntitySystem
             return;
         
         var serverTick = _gameClient.GetServerTick();
+        var tickOffset = _gameClient.GePredictServerTickOffset();
         
         if (_needRollback)
         {
@@ -62,7 +63,12 @@ public class ServerUpdateHandlerSystem : EntitySystem
         while (_lastTick < serverTick)
         {
             _lastTick++;
-            PredictTick = _gameClient.GetPredictServerTick(_lastTick);
+            PredictTick = _lastTick + tickOffset;
+            
+            if (PredictTick <= _lastProcessedPredictTick)
+                continue;
+
+            _lastProcessedPredictTick = PredictTick;
             
             _inputStorage.CaptureActualInputs(PredictTick);
             InvokeServerUpdate(_lastTick, PredictTick);
@@ -110,10 +116,10 @@ public class ServerUpdateHandlerSystem : EntitySystem
 
     public void ReconcileState(Entity entity)
     {
-        if (!World.Has<EntityHistory>(entity))
+        if (!World.Has<EntityPredictHistory>(entity))
             return;
         
-        ref var history = ref World.Get<EntityHistory>(entity);
+        ref var history = ref World.Get<EntityPredictHistory>(entity);
         if (!history.NeedsRollback)
             return;
         
@@ -126,7 +132,7 @@ public class ServerUpdateHandlerSystem : EntitySystem
 
     public override void Update(FrameEventArgs args)
     {
-        _query.With<EntityHistory>((_, ref history) =>
+        _query.With<EntityPredictHistory>((_, ref history) =>
         {
             if (!history.NeedsRollback) 
                 return;

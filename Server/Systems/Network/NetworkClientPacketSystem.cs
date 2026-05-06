@@ -32,7 +32,7 @@ public class NetworkClientPacketSystem : BaseSystem
     private void RegisterClientEntity(ClientConnection clientConnection)
     {
         var entity = world.Create();
-        world.Add(entity, new ClientData { ClientConnection = clientConnection, Id = clientConnection.Peer.Id });
+        world.Add(entity, new ClientData { ClientConnection = clientConnection, Id = clientConnection.Id });
         
         _eventBus.Raise<ClientData, NewEntityClient>(entity, new NewEntityClient { ClientEntity = entity });
     }

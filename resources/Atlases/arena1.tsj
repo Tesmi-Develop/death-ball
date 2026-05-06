@@ -1,0 +1,14 @@
+{ "columns":10,
+ "image":"images\/arena1.png",
+ "imageheight":160,
+ "imagewidth":160,
+ "margin":0,
+ "name":"arena1",
+ "spacing":0,
+ "tilecount":100,
+ "tiledversion":"1.12.1",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

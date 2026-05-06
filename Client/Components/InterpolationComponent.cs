@@ -5,8 +5,9 @@ namespace Client.Components;
 
 public struct InterpolationComponent : IComponent
 {
+    public bool IsBypass = false;
     public Queue<(long Tick, Vector2 Position)> Snapshots = new();
-    public float ClientInterpolationTime = 0; // Наше внутреннее "время прошлого"
+    public float ClientInterpolationTime = 0;
     public Vector2 LastPosition = Vector2.Zero;
 
     public InterpolationComponent()

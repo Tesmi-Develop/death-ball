@@ -18,25 +18,29 @@ public class GameClient : INetEventListener
     [Dependency] private readonly ITime _time = null!;
 
     private const int JitterTick = 3;
-    private NetManager _client = null!;
+    private readonly NetManager _client;
     private NetPeer? _serverPeer;
     public readonly ConcurrentQueue<Packet> Packets = [];
-    public long Ping { get; private set; }
+    public long Ping => _serverPeer is null ? -1 : _ping;
+    private long _ping;
     public long LatencyTick { get; private set; }
     private ArrayBufferWriter<byte> _bufferWriter = new();
     private readonly LatencyProxy _proxy;
     private double _timeOffset;
     private const float TimeSmooth = 0.1f;
-    private const double TickRate = 30;
+    private const double TickRate = 60;
     private const double TickMs = 1000.0 / TickRate;
-    public int Id => _serverPeer?.Id ?? -1;
+    public long Id => _serverPeer is null ? -1 : _id;
+    private long _id = -1;
     public bool Connected => _serverPeer is not null && _serverPeer.ConnectionState == ConnectionState.Connected;
     
     public GameClient()
     {
         _proxy = new LatencyProxy(this, 50, 120, 0);
-        _client = new NetManager(_proxy);
-        _client.UpdateTime = 0;
+        _client = new NetManager(_proxy)
+        {
+            UpdateTime = 0
+        };
     }
 
     public long GetServerTick()
@@ -63,6 +67,11 @@ public class GameClient : INetEventListener
     public long GetPredictServerTick(long currentTick)
     {
         return currentTick + LatencyTick + JitterTick;
+    }
+    
+    public long GePredictServerTickOffset()
+    {
+        return LatencyTick + JitterTick;
     }
     
     public long GetServerTime()
@@ -152,11 +161,12 @@ public class GameClient : INetEventListener
     public void OnPeerConnected(NetPeer peer)
     {
         _serverPeer = peer;
-        _logger.Info($"Connected to Server. Address: {_serverPeer.Address}");
+        _logger.Info($"Connected to Server. Address: {_serverPeer.Address}. My id {peer.Id}");
     }
 
     public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
     {
+        _serverPeer = null;
     }
 
     public void OnNetworkError(IPEndPoint endPoint, SocketError socketError)
@@ -173,47 +183,33 @@ public class GameClient : INetEventListener
         
         var packetType = (PacketType)reader.GetByte();
 
-        if (packetType == PacketType.TimeHydrate)
+        if (packetType == PacketType.Handshake)
         {
             var serverTime = reader.GetLong();
+            _id = reader.GetLong();
             _timeOffset = serverTime - GetLocalTime();
             return;
         }
         
         if (packetType == PacketType.Ping)
         {
-            var t1 = GetLocalTime(); // Текущее "сырое" время клиента
-            var clientSentTime = reader.GetLong(); // Время отправки из пакета
-            var serverTime = reader.GetLong(); // Время на сервере
-    
-            // 1. Считаем RTT и задержку в одну сторону
+            var t1 = GetLocalTime();
+            var clientSentTime = reader.GetLong();
+            var serverTime = reader.GetLong();
+            
             var rtt = t1 - clientSentTime;
             var oneWay = rtt / 2.0;
-    
-            // 2. Вычисляем целевой офсет (каким он должен быть в идеале)
-            // Offset = ServerTime + Latency - LocalTime
             var targetOffset = (serverTime + oneWay) - t1;
-    
-            // 3. Считаем разницу между текущим офсетом и целевым
-            // _timeOffset ОБЯЗАТЕЛЬНО должен быть double, иначе точности не будет
             var diff = targetOffset - _timeOffset;
-    
-            // 4. Обновляем пинг для статистики
-            Ping = (long)(Ping * 0.8 + rtt * 0.2);
+            
+            _ping = (long)(Ping * 0.8 + rtt * 0.2);
             LatencyTick = (long)Math.Floor(oneWay / TickMs);
-
-            // 5. Коррекция
-            // Если разрыв больше 2 тиков (66мс), прыгаем сразу, чтобы не ждать инерцию
+            
             if (Math.Abs(diff) > 66)
-            {
                 _timeOffset = targetOffset;
-            }
             else
-            {
-                // Плавно подтягиваемся. Используем double, чтобы не терять остаток от деления
                 _timeOffset += diff / 8.0; 
-            }
-    
+            
             return;
         }
         

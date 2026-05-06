@@ -5,7 +5,9 @@ using Hypercube.Utilities.Dependencies;
 using Server.Components;
 using Server.Components.Events;
 using Server.Events;
+using Server.Extensions;
 using Shared.Components;
+using Shared.Data;
 
 namespace Server.Systems;
 
@@ -18,8 +20,8 @@ public class SpawnPlayerCharacterSystem : BaseSystem
     public override void Initialize()
     {
         _eventBus.Subscribe((Entity playerEntity, ref ClientData playerData, ref NewEntityClient _) =>
-        {
-            //SpawnPlayerCharacter(playerEntity, ref playerData);
+        { 
+            SpawnPlayerCharacter(playerEntity, ref playerData);
         });
     }
 
@@ -29,7 +31,8 @@ public class SpawnPlayerCharacterSystem : BaseSystem
         world.Add(playerEntity, new ControlledEntity { Reference = characterEntity});
         
         world.Add(characterEntity, new NetworkTransform { Position = Vector2.Zero });
-        world.Add(characterEntity, new Speed { Value = 8f });
+        world.Add(characterEntity, new Speed { Value = 4f });
         world.Add(characterEntity, new PlayerCharacter { ClientId = playerData.Id });
+        world.AddCollision(characterEntity, new Vector2(32, 32));
     }
 }

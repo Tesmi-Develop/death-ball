@@ -6,9 +6,11 @@ using Hypercube.Mathematics.Vectors;
 using Hypercube.Utilities.Dependencies;
 using Server.Components;
 using Server.Events;
+using Server.Extensions;
 using Server.Helpers;
 using Server.Utilities;
 using Shared.Components;
+using Shared.Data;
 
 namespace Server.Systems;
 
@@ -26,7 +28,7 @@ public class TestSystem : BaseSystem
     
     public override void PostInitialize()
     {
-        Task.Run(async () =>
+        /*Task.Run(async () =>
         {
             await Task.Delay(5000);
             Console.WriteLine("Start test");
@@ -35,6 +37,19 @@ public class TestSystem : BaseSystem
                 var entity2 = world.Create();
                 world.Add(entity2, new NetworkTransform() { Position = Vector2.One });
                 world.Add(entity2, new TargetLocation() { Location = Vector2.One });
+            }
+        });*/
+        Task.Run(async () =>
+        {
+            await Task.Delay(5000);
+            var size = new Vector2(32, 32);
+            var pos = new Vector2(30, 30);
+            for (var i = 0; i < 1; i++)
+            {
+                var entity2 = world.Create();
+                world.Add(entity2, new NetworkTransform { Position = pos });
+                world.AddCollision(entity2, size, isStatic: true);
+                pos += new Vector2(size.X, 0);
             }
         });
  

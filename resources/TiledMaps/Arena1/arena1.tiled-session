@@ -1,0 +1,60 @@
+{
+    "activeFile": "arena1.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "D:/Projects/DeathBall/death-ball/resources/Atlases/arena0.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 11
+        },
+        "D:/Projects/DeathBall/death-ball/resources/Atlases/arena1.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 3
+        },
+        "D:/Projects/DeathBall/death-ball/resources/Atlases/utilities.tsx": {
+            "scaleInDock": 11,
+            "scaleInEditor": 16
+        },
+        "D:/Projects/DeathBall/death-ball/resources/atlas0.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "arena1.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 259.33333333333337,
+                "y": 401.66666666666663
+            }
+        }
+    },
+    "last.exportedFilePath": "D:/Projects/DeathBall/death-ball/resources/Atlases",
+    "last.imagePath": "D:/Projects/DeathBall/death-ball/resources/Atlases/images",
+    "map.height": 30,
+    "map.lastUsedExportFilter": "JSON map-файлы (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.renderOrder": "3",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "openFiles": [
+        "arena1.tmx",
+        "D:/Projects/DeathBall/death-ball/resources/Atlases/utilities.tsx",
+        "D:/Projects/DeathBall/death-ball/resources/Atlases/arena1.tsx"
+    ],
+    "project": "arena1.tiled-project",
+    "property.type": "string",
+    "recentFiles": [
+        "D:/Projects/DeathBall/death-ball/resources/Atlases/arena1.tsx",
+        "D:/Projects/DeathBall/death-ball/resources/Atlases/utilities.tsx",
+        "arena1.tmx",
+        "D:/Projects/DeathBall/death-ball/resources/Atlases/arena0.tsx",
+        "D:/Projects/DeathBall/death-ball/resources/atlas0.tsx"
+    ],
+    "tileset.lastUsedExportFilter": "JSON файлы с наборами тайлов (*.tsj *.json)",
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

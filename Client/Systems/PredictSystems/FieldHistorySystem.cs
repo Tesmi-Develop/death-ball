@@ -12,12 +12,12 @@ public class FieldHistorySystem : EntitySystem
     
     public override void Initialize()
     {
-        _query = GetQuery().WithAll<EntityHistory>().Build();
+        _query = GetQuery().WithAll<EntityPredictHistory>().Build();
     }
 
     public void WriteEntitiesHistory(long serverTick)
     {
-        _query.With<EntityHistory>((entity, ref history) =>
+        _query.With<EntityPredictHistory>((entity, ref history) =>
         {
             foreach (var componentId in history.Buffers.Keys)
                 NetworkFactory.WriteComponentHistory(componentId, entity, World, serverTick, ref history);

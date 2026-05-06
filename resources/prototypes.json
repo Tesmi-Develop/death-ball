@@ -1,0 +1,7 @@
+﻿{
+  "Wall": {
+    "HitboxDeclarationComponent": {
+      "ShapeType": 2
+    }
+  }
+}

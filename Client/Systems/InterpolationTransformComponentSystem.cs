@@ -12,7 +12,7 @@ using Shared.Components;
 
 namespace Client.Systems;
 
-public class SyncerTransformComponentSystem : EntitySystem
+public class InterpolationTransformComponentSystem : EntitySystem
 {
     [Dependency] private readonly GameClient _client = null!;
     private double _visualTickCursor = -1;
@@ -26,7 +26,7 @@ public class SyncerTransformComponentSystem : EntitySystem
             .Build();
     }
 
-    public override void Update(FrameEventArgs deltaTime)
+    public override void AfterUpdate(FrameEventArgs deltaTime)
     {
         const double bufferTicks = 3.0;
         var targetTick = _client.GetServerTickDouble() - bufferTicks;
@@ -44,6 +44,14 @@ public class SyncerTransformComponentSystem : EntitySystem
 
         _query.With<NetworkTransform, TransformComponent, InterpolationComponent>((entity, ref net, ref transform, ref interp) =>
         {
+            if (interp.IsBypass)
+            {
+                transform.LocalPosition = new Vector3(net.Position.X, net.Position.Y, transform.LocalPosition.Z);
+                return;
+            }
+            transform.LocalPosition = new Vector3(net.Position.X, net.Position.Y, transform.LocalPosition.Z);
+            return;
+            
             var snapshots = interp.Snapshots;
             while (snapshots.TryPeekNext(out var next) && next.Tick <= renderTick)
             {

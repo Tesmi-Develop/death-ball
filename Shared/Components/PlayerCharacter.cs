@@ -6,5 +6,5 @@ namespace Shared.Components;
 [SyncComponent]
 public partial struct PlayerCharacter : IComponent
 {
-    public int ClientId;
+    public long ClientId;
 }

@@ -131,9 +131,9 @@ public class SyncComponentGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
 
         sb.AppendLine("    [MethodImpl(MethodImplOptions.AggressiveInlining)]");
-        sb.AppendLine("    public void Deserialize(ReadOnlyMemory<byte> sequence, MessagePackSerializerOptions options = null)");
+        sb.AppendLine("    public void Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options = null)");
         sb.AppendLine("    {");
-        sb.AppendLine($"        var data = MessagePackSerializer.Deserialize<{syncDataName}>(sequence, options);");
+        sb.AppendLine($"        var data = MessagePackSerializer.Deserialize<{syncDataName}>(ref reader, options);");
         
         foreach (var field in fields)
         {
@@ -143,7 +143,6 @@ public class SyncComponentGenerator : IIncrementalGenerator
 
             if (fieldType.Contains("List<"))
             {
-                // Конвертируем массив обратно в List
                 sb.AppendLine($"        this.{name} = data.{cleanName} != null ? new {fieldType}(data.{cleanName}) : null;");
             }
             else

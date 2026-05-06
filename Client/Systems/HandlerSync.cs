@@ -5,6 +5,7 @@ using Hypercube.Ecs;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using MessagePack;
+using Shared.Components;
 using Shared.Data;
 
 namespace Client.Systems;
@@ -65,9 +66,7 @@ public class HandlerSync : EntitySystem
             for (var j = 0; j < countComponents; j++)
             {
                 var componentId = reader.ReadInt32();
-                var componentData = payload[(int)reader.Consumed..];
-                NetworkFactory.AddComponentFromPayload(componentId, entity, World, componentData);
-                reader.Skip();
+                NetworkFactory.AddComponentFromPayload(componentId, entity, World, ref reader);
             }
         }
     }
@@ -93,15 +92,12 @@ public class HandlerSync : EntitySystem
             for (var j = 0; j < componentCounts; j++)
             {
                 var componentId = reader.ReadInt32();
-                var componentData = payload[(int)reader.Consumed..];
 
                 if (!skipDirty)
                 {
-                    NetworkFactory.PatchComponentFromPayload(componentId, entity, World, packetServerTick, componentData);
+                    NetworkFactory.PatchComponentFromPayload(componentId, entity, World, packetServerTick, ref reader);
                     _serverUpdateHandlerSystem.ReconcileState(entity);
                 }
-
-                reader.Skip();
             }
         }
     }
@@ -130,10 +126,8 @@ public class HandlerSync : EntitySystem
             var entityId = reader.ReadInt64();
             var entity = GetNetworkEntity(entityId);
             var componentId = reader.ReadInt32();
-            var componentData = payload[(int)reader.Consumed..];
             
-            NetworkFactory.AddComponentFromPayload(componentId, entity, World, componentData);
-            reader.Skip();
+            NetworkFactory.AddComponentFromPayload(componentId, entity, World, ref reader);
         }
     }
 

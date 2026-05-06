@@ -3,7 +3,7 @@ namespace Shared.Data;
 public enum PacketType : byte
 {
     Ping,
-    TimeHydrate,
+    Handshake,
     Hydrate,
     Dirty,
     EntitiesDeletion,

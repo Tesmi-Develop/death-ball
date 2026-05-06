@@ -13,10 +13,10 @@ public class PredictHelper : EntitySystem
     
     public void PredictField<T>(Entity entity, string fieldName) where T : unmanaged, IComponent
     {
-        if (!World.Has<EntityHistory>(entity))
-            World.Add(entity, new EntityHistory());
+        if (!World.Has<EntityPredictHistory>(entity))
+            World.Add(entity, new EntityPredictHistory());
     
-        ref var data = ref World.Get<EntityHistory>(entity);
+        ref var data = ref World.Get<EntityPredictHistory>(entity);
         var componentId = NumeratorGenerator.GetId(typeof(T));
     
         if (!data.Buffers.TryGetValue(componentId, out var fields))

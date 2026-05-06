@@ -6,8 +6,10 @@ using Hypercube.Core.Execution.Timing;
 using Hypercube.Core.Graphics.Patching;
 using Hypercube.Core.Resources;
 using Hypercube.Core.UI;
+using Hypercube.Physics;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
+using Shared;
 using Shared.Helpers;
 
 namespace Client;
@@ -17,8 +19,12 @@ public static class EntryPoint
     [EntryPoint(EntryPointStage.BeforeInit)]
     public static void Init(DependenciesContainer container)
     {
+        Contacts.Initialize();
         MessagePackHelper.SetupMessagePack();
         container.Register<GameClient>();
+        
+        var mapHandler = new MapHandler("/TiledMaps/Arena1/arena1.tmj");
+        container.RegisterSingleton<MapHandler>(mapHandler);
     }
     
     [EntryPoint(EntryPointStage.AfterInit)]
@@ -34,7 +40,7 @@ public static class EntryPoint
 
         var time = container.Resolve<ITime>();
         
-        /*var sound = resourceManager.Load<Audio>("/audio/game_boi_3.wav");
+       /* var sound = resourceManager.Load<Audio>("/audio/game_boi_3.wav");
         var source = audio.CreateSource(sound);
         
         source.Start();*/

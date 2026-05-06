@@ -1,6 +1,7 @@
 ﻿using MessagePack;
 using MessagePack.Resolvers;
 using Shared.MessagePackFormatters;
+using Shared.MessagePackFormatters.Shapes;
 
 namespace Shared.Helpers;
 
@@ -10,6 +11,10 @@ public static class MessagePackHelper
     {
         var formatterResolver = StaticCompositeResolver.Instance;
         formatterResolver.Register(new Vector2Formatter());
+        formatterResolver.Register(new ShapeCircleFormatter());
+        formatterResolver.Register(new ShapePolygonFormatter());
+        formatterResolver.Register(new ShapeUnionTypedFormatter());
+        formatterResolver.Register(new FixedArray8Vector2Formatter());
         
         var resolver = CompositeResolver.Create(
             formatterResolver,

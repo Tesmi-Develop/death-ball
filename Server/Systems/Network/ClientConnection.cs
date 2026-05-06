@@ -9,10 +9,13 @@ public class ClientConnection
 {
     public readonly NetPeer Peer;
     public readonly ConcurrentQueue<Packet> IncomingPackets = new();
+    public long Id { get; }
 
-    public ClientConnection(NetPeer peer)
+    public ClientConnection(NetPeer peer, long id)
     {
         Peer = peer;
+        Id = id;
+        Console.WriteLine(peer.Id);
     }
 
     public void Send(byte[] data, DeliveryMethod deliveryMethod)

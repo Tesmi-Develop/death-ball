@@ -14,7 +14,6 @@ namespace Client.Systems;
 
 public class CharacterControllerSystem : EntitySystem, IServerUpdate
 {
-    [Dependency] private readonly IInputHandler _inputHandler = null!;
     [Dependency] private readonly InputStorage _inputStorage = null!;
     [Dependency] private readonly NetworkHelper _networkHelper = null!;
     [Dependency] private readonly GameClient _gameClient = null!;
@@ -49,8 +48,8 @@ public class CharacterControllerSystem : EntitySystem, IServerUpdate
 
             if (direction != Vector2.Zero)
             {
-                _networkHelper.SendInputIfPredicting(new MoveRequest { Direction = direction }, DeliveryMethod.Unreliable);
                 transform.Position += direction * speed.Value;
+                _networkHelper.SendInputIfPredicting(new MoveRequest { Direction = direction }, DeliveryMethod.Unreliable);
             }
         });
     }

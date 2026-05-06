@@ -23,6 +23,7 @@
     <ItemGroup>
         <None Include="$(SolutionDir)hypercube/libs/**" Link="%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
         <None Include="$(SolutionDir)hypercube/resources/**" Link="resources/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+        <None Include="$(SolutionDir)resources/**" Link="resources/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
     </ItemGroup>
   
     <ItemGroup>

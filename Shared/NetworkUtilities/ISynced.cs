@@ -7,5 +7,5 @@ namespace Shared.NetworkUtilities;
 public interface ISynced : IComponent
 {
     void Serialize(IBufferWriter<byte> writer, MessagePackSerializerOptions? options);
-    void Deserialize(ReadOnlyMemory<byte> sequence, MessagePackSerializerOptions? options);
+    void Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions? options);
 }

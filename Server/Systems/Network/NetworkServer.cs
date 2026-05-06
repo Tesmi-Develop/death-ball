@@ -22,6 +22,7 @@ public class NetworkServer : BaseSystem, INetEventListener
     private readonly NetManager _server;
     private readonly ConcurrentDictionary<NetPeer, ClientConnection> _connections = [];
     private readonly ConcurrentQueue<IEvent> _eventQueue = [];
+    private long _freeClientId;
 
     public NetworkServer()
     {
@@ -56,17 +57,23 @@ public class NetworkServer : BaseSystem, INetEventListener
         }
     }
 
+    private void SendHandshake(ClientConnection connection)
+    {
+        Span<byte> buffer = stackalloc byte[1 + 8 + 8];
+        buffer[0] = (byte)PacketType.Handshake;
+        MessagePackHelper.WriteInt64(buffer.Slice(1), GetServerTime());
+        MessagePackHelper.WriteInt64(buffer.Slice(9), connection.Id);
+        
+        connection.Peer.Send(buffer.ToArray(), DeliveryMethod.ReliableOrdered);
+    }
+
     public void OnPeerConnected(NetPeer peer)
     {
-        var newConnection = new ClientConnection(peer);
+        var newConnection = new ClientConnection(peer, _freeClientId++);
         _connections.TryAdd(peer, newConnection);
         _eventQueue.Enqueue(new ClientConnected { ClientConnection = newConnection });
         
-        Span<byte> buffer = stackalloc byte[1 + 8];
-        buffer[0] = (byte)PacketType.TimeHydrate;
-        MessagePackHelper.WriteInt64(buffer.Slice(1), GetServerTime());
-        
-        peer.Send(buffer.ToArray(), DeliveryMethod.ReliableOrdered);
+        SendHandshake(newConnection);
         _logger.Info($"New client connected {peer.Address}:{peer.Port}");
     }
 

@@ -1,4 +1,5 @@
 using Arch.Core;
+using Shared.Components;
 
 namespace Server.Extensions;
 

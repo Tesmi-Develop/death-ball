@@ -10,7 +10,7 @@ public struct ClientData
     public ClientConnection ClientConnection = null!;
     public InputData[] InputsWithTick = new InputData[60];
     public List<InputData> Inputs = [];
-    public int Id = 0;
+    public long Id = 0;
 
     public ClientData()
     {

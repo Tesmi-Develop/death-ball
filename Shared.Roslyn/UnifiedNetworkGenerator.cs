@@ -96,26 +96,27 @@ public sealed class UnifiedNetworkGenerator : IIncrementalGenerator
         sb.AppendLine("using Shared.NetworkUtilities;");
         sb.AppendLine("using Shared.Components;");
         sb.AppendLine("using Shared.Helpers;");
+        sb.AppendLine("using Shared.Data;");
         sb.AppendLine("using Hypercube.Ecs.Events;");
         sb.AppendLine("using Hypercube.Ecs;");
 
         sb.AppendLine("public static class NetworkFactory");
         sb.AppendLine("{");
         
-        sb.AppendLine("    public static void AddComponentFromPayload(int id, Entity entity, World world, ReadOnlyMemory<byte> data)");
+        sb.AppendLine("    public static void AddComponentFromPayload(int id, Entity entity, World world, ref MessagePackReader reader)");
         sb.AppendLine("    {");
         sb.AppendLine("        switch (id)");
         sb.AppendLine("        {");
         foreach (var (type, i) in types.Select((t, i) => (t, i)))
         {
             if (!type.IsSynced) continue;
-            sb.AppendLine($"            case {i}: {{ var c = new {type.FullName}(); c.Deserialize(data); world.Add(entity, ref c); break; }}");
+            sb.AppendLine($"            case {i}: {{ var c = new {type.FullName}(); c.Deserialize(ref reader); world.Add(entity, ref c); break; }}");
         }
         sb.AppendLine("            default: throw new ArgumentException();");
         sb.AppendLine("        }");
         sb.AppendLine("    }");
         
-        sb.AppendLine("    public static void PatchComponentFromPayload(int id, Entity entity, World world, long serverTick, ReadOnlyMemory<byte> data)");
+        sb.AppendLine("    public static void PatchComponentFromPayload(int id, Entity entity, World world, long serverTick, ref MessagePackReader reader)");
         sb.AppendLine("    {");
         sb.AppendLine("        switch (id)");
         sb.AppendLine("        {");
@@ -129,12 +130,12 @@ public sealed class UnifiedNetworkGenerator : IIncrementalGenerator
             sb.AppendLine("                {");
             sb.AppendLine($"                    if (!world.Has<{type.FullName}>(entity)) break;");
             sb.AppendLine("");
-            sb.AppendLine($"                    var serverData = MessagePackSerializer.Deserialize<{type.FullName}_SyncData>(data);");
+            sb.AppendLine($"                    var serverData = MessagePackSerializer.Deserialize<{type.FullName}_SyncData>(ref reader);");
             sb.AppendLine("");
-            sb.AppendLine("                    if (world.Has<EntityHistory>(entity) &&");
-            sb.AppendLine($"                        world.Get<EntityHistory>(entity).Buffers.TryGetValue({i}, out var fieldBuffers))");
+            sb.AppendLine("                    if (world.Has<EntityPredictHistory>(entity) &&");
+            sb.AppendLine($"                        world.Get<EntityPredictHistory>(entity).Buffers.TryGetValue({i}, out var fieldBuffers))");
             sb.AppendLine("                    {");
-            sb.AppendLine("                        ref var history = ref world.Get<EntityHistory>(entity);");
+            sb.AppendLine("                        ref var history = ref world.Get<EntityPredictHistory>(entity);");
             sb.AppendLine($"                        ref var currentComp = ref world.Get<{type.FullName}>(entity);");
             sb.AppendLine("");
             sb.AppendLine("                        bool mispredicted = false;");
@@ -162,7 +163,7 @@ public sealed class UnifiedNetworkGenerator : IIncrementalGenerator
             sb.AppendLine("                    }");
             sb.AppendLine("");
             sb.AppendLine($"                    var serverComp = new {type.FullName}();");
-            sb.AppendLine($"                    serverComp.Deserialize(data);");
+            sb.AppendLine($"                    serverComp.Deserialize(ref reader);");
             sb.AppendLine($"                    world.Get<{type.FullName}>(entity) = serverComp;");
             sb.AppendLine("");
             sb.AppendLine("                    break;");
@@ -172,7 +173,7 @@ public sealed class UnifiedNetworkGenerator : IIncrementalGenerator
         sb.AppendLine("        }");
         sb.AppendLine("    }");
         
-        sb.AppendLine("    public static void WriteComponentHistory(int id, Entity entity, World world, long tick, ref EntityHistory history)");
+        sb.AppendLine("    public static void WriteComponentHistory(int id, Entity entity, World world, long tick, ref EntityPredictHistory history)");
         sb.AppendLine("    {");
         sb.AppendLine("        switch (id)");
         sb.AppendLine("        {");
@@ -183,9 +184,10 @@ public sealed class UnifiedNetworkGenerator : IIncrementalGenerator
             sb.AppendLine("                {");
             sb.AppendLine($"                    ref var component = ref world.Get<{type.FullName}>(entity);");
             sb.AppendLine($"                    var buffers = history.Buffers[{i}];");
+            sb.AppendLine($"                    FieldHistoryBuffer buffer;");
             for (var f = 0; f < type.Fields.Length; f++)
             {
-                sb.AppendLine($"                    var buffer = buffers[{f}];");
+                sb.AppendLine($"                    buffer = buffers[{f}];");
                 sb.AppendLine($"                    FieldHistoryHelper.WriteField<{type.FullName}>(ref buffer, tick, ref component);");
             }
             sb.AppendLine("                    break;");

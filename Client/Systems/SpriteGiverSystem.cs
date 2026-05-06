@@ -5,12 +5,14 @@ using Hypercube.Core.Systems.Rendering;
 using Hypercube.Core.Systems.Transform;
 using Hypercube.Ecs;
 using Hypercube.Ecs.Queries;
+using Hypercube.Utilities.Dependencies;
 using Shared.Components;
 
 namespace Client.Systems;
 
 public class SpriteGiverSystem : EntitySystem
 {
+    [Dependency] private GameClient _gameClient = null!;
     private Query _query = null!;
     private List<Entity> _entities = new();
 
@@ -38,7 +40,13 @@ public class SpriteGiverSystem : EntitySystem
         {
             AddComponent(e, new TransformComponent());
             AddComponent(e, new SpriteComponent() { Path = "/textures/default.png" });
-            AddComponent(e, new InterpolationComponent());
+
+            var intep = new InterpolationComponent();
+            
+            if (HasComponent<PlayerCharacter>(e) && GetComponent<PlayerCharacter>(e).ClientId == _gameClient.Id)
+                intep.IsBypass = true;
+            
+            AddComponent(e, intep);
         } 
         
         if (i > 0)
