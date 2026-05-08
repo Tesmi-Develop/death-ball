@@ -3,7 +3,7 @@ using Hypercube.Core.Graphics.Utilities.Extensions;
 using Hypercube.Core.Resources;
 using Hypercube.Core.Resources.FileSystems;
 using Hypercube.Core.Resources.Loaders;
-using Shared.Resources;
+using Shared.ResourcesData;
 
 namespace Shared;
 

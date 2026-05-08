@@ -29,13 +29,14 @@ public readonly struct EventHandlerList()
         try
         {
             var entry = new HandlerEntry(priority, handler);
-            if (priority == NoPriority)
+            var index = _handlers.FindIndex(h => priority > h.Priority);
+            
+            if (index == -1)
             {
                 _handlers.Add(entry);
                 return;
             }
-
-            var index = _handlers.FindIndex(h => priority > h.Priority);
+            
             _handlers.Insert(index, entry);
         }
         finally

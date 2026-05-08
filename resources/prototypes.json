@@ -3,5 +3,8 @@
     "HitboxDeclarationComponent": {
       "ShapeType": 2
     }
+  },
+  "PlayerSpawner": {
+    "PlayerSpawner": {}
   }
 }

@@ -1,4 +1,5 @@
-﻿using Client.LifeCycles;
+﻿using Client.Data;
+using Client.LifeCycles;
 using Hypercube.Core.Ecs;
 using Hypercube.Core.Execution.LifeCycle;
 using Hypercube.Ecs;
@@ -6,6 +7,7 @@ using Hypercube.Ecs.Queries;
 using Hypercube.Physics;
 using Hypercube.Physics.Manifolds;
 using Hypercube.Utilities.Dependencies;
+using Shared.Attributes;
 using Shared.Components;
 
 namespace Client.Systems.Collisions;
@@ -30,7 +32,7 @@ public class CollisionSystem : EntitySystem, IServerUpdate
         ref var hitboxA = ref GetComponent<HitboxComponent>(entityA);
         ref var hitboxB = ref GetComponent<HitboxComponent>(entityB);
         
-        if (hitboxA.IsTrigger || hitboxB.IsTrigger)
+        if (hitboxB.IsTrigger)
             return Manifold.Empty;
         
         var manifold = GetManifold(ref transformA, ref hitboxA, ref transformB, ref hitboxB);
@@ -104,11 +106,12 @@ public class CollisionSystem : EntitySystem, IServerUpdate
         return Manifold.Empty;
     }
 
+    [Priority(ServerUpdatePriority.Low)]
     public void ServerUpdate(long serverTick, long predictTick)
     {
         _movableQuery.With((Entity entity, ref NetworkTransform trans, ref HitboxComponent hitbox) =>
         {
-            if (hitbox.IsStatic || hitbox.IsTrigger || !hitbox.GridIndex.HasValue) 
+            if (hitbox.IsStatic || !hitbox.GridIndex.HasValue) 
                 return;
 
             _neighborBuffer.Clear();
@@ -119,7 +122,7 @@ public class CollisionSystem : EntitySystem, IServerUpdate
                 if (entity == neighbor) 
                     continue;
 
-                ResolveCollision(entity, neighbor);
+               // ResolveCollision(entity, neighbor);
             }
         });
     }

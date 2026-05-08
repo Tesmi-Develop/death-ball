@@ -2,7 +2,6 @@
 using Hypercube.Mathematics.Shapes;
 using Hypercube.Mathematics.Vectors;
 using Shared.Components;
-using Shared.Components.Commands;
 
 namespace Server.Systems;
 
@@ -17,10 +16,11 @@ public class CollisionWorldSystem : BaseSystem
 
     public override void Initialize()
     {
-        world.SubscribeComponentRemoved<HitboxComponent>((in entity, ref hitbox) =>
+        /*world.SubscribeComponentRemoved<HitboxComponent>((in entity, ref hitbox) =>
         {
+            Console.WriteLine("removed hitbox");
             UnregisterEntity(entity, ref hitbox);
-        });
+        });*/
     }
 
     public override void Update(long tick)
@@ -28,7 +28,7 @@ public class CollisionWorldSystem : BaseSystem
         world.Query(in _query, (Entity entity, ref NetworkTransform trans, ref HitboxComponent hitbox, ref HitboxComponent presence) =>
         {
             var currentGridIndex = WorldToGrid(trans.Position);
-        
+            
             if (currentGridIndex == presence.GridIndex)
                 return;
         

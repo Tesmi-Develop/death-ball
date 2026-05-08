@@ -2,7 +2,6 @@
 using Client.LifeCycles;
 using Client.Systems.PredictSystems;
 using Hypercube.Core.Ecs;
-using Hypercube.Core.Input.Handler;
 using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics.Vectors;
 using Hypercube.Utilities.Dependencies;
@@ -10,7 +9,7 @@ using LiteNetLib;
 using Shared.Components;
 using Shared.Components.Commands;
 
-namespace Client.Systems;
+namespace Client.Systems.CharacterSystems;
 
 public class CharacterControllerSystem : EntitySystem, IServerUpdate
 {

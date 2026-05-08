@@ -161,7 +161,7 @@ public class GameClient : INetEventListener
     public void OnPeerConnected(NetPeer peer)
     {
         _serverPeer = peer;
-        _logger.Info($"Connected to Server. Address: {_serverPeer.Address}. My id {peer.Id}");
+        _logger.Info($"Connected to Server. Address: {_serverPeer.Address}.");
     }
 
     public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
@@ -188,6 +188,7 @@ public class GameClient : INetEventListener
             var serverTime = reader.GetLong();
             _id = reader.GetLong();
             _timeOffset = serverTime - GetLocalTime();
+            _logger.Info($"My id {_id}");
             return;
         }
         

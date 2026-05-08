@@ -15,7 +15,6 @@ public class ClientConnection
     {
         Peer = peer;
         Id = id;
-        Console.WriteLine(peer.Id);
     }
 
     public void Send(byte[] data, DeliveryMethod deliveryMethod)

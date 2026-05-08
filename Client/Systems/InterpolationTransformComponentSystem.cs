@@ -5,7 +5,6 @@ using Hypercube.Core.Execution.LifeCycle;
 using Hypercube.Core.Systems.Rendering;
 using Hypercube.Core.Systems.Transform;
 using Hypercube.Ecs.Queries;
-using Hypercube.Mathematics;
 using Hypercube.Mathematics.Vectors;
 using Hypercube.Utilities.Dependencies;
 using Shared.Components;
@@ -22,7 +21,7 @@ public class InterpolationTransformComponentSystem : EntitySystem
     public override void Initialize()
     {
         _query = GetQuery()
-            .WithAll<NetworkTransform, TransformComponent, InterpolationComponent, SpriteComponent>()
+            .WithAll<NetworkTransform, TransformComponent, Interpolation, SpriteComponent>()
             .Build();
     }
 
@@ -42,15 +41,13 @@ public class InterpolationTransformComponentSystem : EntitySystem
          
         var renderTick = _visualTickCursor;
 
-        _query.With<NetworkTransform, TransformComponent, InterpolationComponent>((entity, ref net, ref transform, ref interp) =>
+        _query.With<NetworkTransform, TransformComponent, Interpolation>((entity, ref net, ref transform, ref interp) =>
         {
             if (interp.IsBypass)
             {
                 transform.LocalPosition = new Vector3(net.Position.X, net.Position.Y, transform.LocalPosition.Z);
                 return;
             }
-            transform.LocalPosition = new Vector3(net.Position.X, net.Position.Y, transform.LocalPosition.Z);
-            return;
             
             var snapshots = interp.Snapshots;
             while (snapshots.TryPeekNext(out var next) && next.Tick <= renderTick)

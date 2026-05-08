@@ -17,10 +17,11 @@ namespace Client.Systems.Collisions;
 public sealed class CollisionDebugRenderSystem : PatchEntitySystem
 {
     public const bool DebugDrawNearbyCollisions = true;
-    public const bool DebugDrawChunksNum = true;
+    public const bool DebugDrawChunksNum = false;
 
     [Dependency] private readonly IResourceManager _resourceManager = null!;
-    
+
+    [Dependency] private readonly GameClient _gameClient = null!;
     [Dependency] private readonly CollisionSystem _collision = null!;
     [Dependency] private readonly CollisionWorldSystem _collisionWorld = null!;
 
@@ -52,8 +53,11 @@ public sealed class CollisionDebugRenderSystem : PatchEntitySystem
 
     private void DrawNearbyCollisions(IRenderContext renderer, DrawPayload payload)
     {
-        _query.With((Entity entity, ref HitboxComponent hitboxComponent) =>
+        _query.With((Entity entity, ref HitboxComponent hitboxComponent, ref PlayerCharacter playerCharacter) =>
         {
+            if (playerCharacter.ClientId != _gameClient.Id)
+                return;
+            
             if (hitboxComponent.GridIndex is not { } gridIndex)
                 return;
             

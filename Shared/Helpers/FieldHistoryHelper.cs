@@ -9,7 +9,7 @@ namespace Shared.Helpers;
 public static class FieldHistoryHelper
 {
     public static FieldHistoryBuffer CreateFieldBuffer<TComponent, TField>(string fieldName, int capacity) 
-        where TComponent : unmanaged 
+        where TComponent : struct
         where TField : unmanaged
     {
         var offset = (int)Marshal.OffsetOf<TComponent>(fieldName);
@@ -25,9 +25,9 @@ public static class FieldHistoryHelper
             FieldName = fieldName
         };
     }
-    
-    public static FieldHistoryBuffer CreateFieldBuffer<TComponent>(FieldInfo fieldInfo, int capacity) 
-        where TComponent : unmanaged
+
+    public static FieldHistoryBuffer CreateFieldBuffer<TComponent>(FieldInfo fieldInfo, int capacity)
+        where TComponent : struct
     {
         var offset = (int)Marshal.OffsetOf<TComponent>(fieldInfo.Name);
         var size = Marshal.SizeOf(fieldInfo.FieldType);
@@ -47,7 +47,7 @@ public static class FieldHistoryHelper
         ref FieldHistoryBuffer history, 
         long tick, 
         ref TComponent component) 
-        where TComponent : unmanaged
+        where TComponent : struct
     {
         var compSpan = MemoryMarshal.CreateReadOnlySpan(ref component, 1);
         var compBytes = MemoryMarshal.AsBytes(compSpan);
@@ -74,7 +74,7 @@ public static class FieldHistoryHelper
         long tick, 
         ref TComponent serverComponent,
         float eps = 1e-6f) 
-        where TComponent : unmanaged
+        where TComponent : struct
     {
         var bufferIndex = (int)(tick % history.Capacity);
         var bufferOffset = bufferIndex * history.FieldSize;

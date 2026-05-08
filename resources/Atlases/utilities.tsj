@@ -24,7 +24,7 @@
                 {
                  "name":"Type",
                  "type":"string",
-                 "value":"Spawner"
+                 "value":"PlayerSpawner"
                 }]
         }],
  "tilewidth":16,

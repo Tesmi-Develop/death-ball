@@ -5,7 +5,6 @@ using Hypercube.Ecs;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using MessagePack;
-using Shared.Components;
 using Shared.Data;
 
 namespace Client.Systems;
@@ -51,6 +50,7 @@ public class HandlerSync : EntitySystem
     
     private void DoHydrate(ReadOnlyMemory<byte> payload)
     {
+        _logger.Trace("Start hydrate");
         var reader = new MessagePackReader(payload);
         var countEntities = reader.ReadInt32();
 
@@ -67,6 +67,7 @@ public class HandlerSync : EntitySystem
             {
                 var componentId = reader.ReadInt32();
                 NetworkFactory.AddComponentFromPayload(componentId, entity, World, ref reader);
+                _logger.Trace($"Added component with type {NumeratorGenerator.GetType(componentId).Name}, entity {entity} with ServerMask: {entityMask}");
             }
         }
     }
@@ -118,6 +119,7 @@ public class HandlerSync : EntitySystem
 
     private void DoComponentAddition(ReadOnlyMemory<byte> payload)
     {
+        _logger.Trace("Start component addition");
         var reader = new MessagePackReader(payload);
         var entityCount = reader.ReadInt32();
 
@@ -128,6 +130,7 @@ public class HandlerSync : EntitySystem
             var componentId = reader.ReadInt32();
             
             NetworkFactory.AddComponentFromPayload(componentId, entity, World, ref reader);
+            _logger.Trace($"Added component {NumeratorGenerator.GetType(componentId).Name}, entity {entity} with ServerMask: {entityId}");
         }
     }
 
@@ -152,12 +155,14 @@ public class HandlerSync : EntitySystem
         _networkEntitiesById.Add(entityId, entity);
         _networkEntitiesByEntity.Add(entity, entityId);
         
+        _logger.Trace($"Created Network Entity {entity} with ServerMask: {entityId}");
+        
         return  entity;
     }
 
     public bool TryGetNetworkEntityMask(Entity entity, out long entityMask)
     {
-        entityMask = 0;
+        entityMask = -1;
         
         if (!_networkEntitiesByEntity.TryGetValue(entity, out var entityId)) 
             return false;

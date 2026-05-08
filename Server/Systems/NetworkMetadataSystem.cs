@@ -8,6 +8,7 @@ namespace Server.Systems;
 [EcsSystem(EcsPriority.High)]
 public class NetworkMetadataSystem : BaseSystem
 {
+    [Priority(EcsPriority.High)]
     public override void PreInitialize()
     {
         var entity = world.Create();

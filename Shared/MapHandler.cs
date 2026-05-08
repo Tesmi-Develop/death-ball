@@ -7,10 +7,8 @@ using Hypercube.Ecs.Components;
 using Hypercube.Mathematics;
 using Hypercube.Mathematics.Shapes;
 using Hypercube.Mathematics.Vectors;
-using Hypercube.Physics.Shapes;
 using Shared.Components;
 using Shared.Extensions;
-using Shared.Resources;
 using Shared.ResourcesData;
 using Shared.ResourcesData.TiledMapParts;
 using Shared.ResourcesData.TiledTilesetParts;
@@ -57,7 +55,15 @@ public class MapHandler : IDisposable
         var tileSize = new Vector2(tileW, tileH);
         var mapSize = new Vector2(Map.Width * tileW, Map.Height * tileH);
 
-        foreach (var layer in Map.Layers.Where(l => l.Visible))
+        foreach (var layer in Map.Layers.Where(l =>
+                 {
+                     var visibleProperty = l.Properties.Find(e => e.Name == "Visible");
+                     
+                     if (visibleProperty is null) 
+                         return true;
+                     
+                     return visibleProperty.Type == "bool" && visibleProperty.GetValue<bool>();
+                 }))
         {
             for (var y = 0; y < layer.Height; y++)
             {
@@ -126,91 +132,16 @@ public class MapHandler : IDisposable
                     if (property is null || property.Type != "string")
                         continue;
                 
-                    var name = (property.Value is JsonElement element ? element : default).Deserialize<string>();
+                    var name = property.GetValue<string>();
 
                     var correctedY = (Map.Height - 1 - y); 
                     var offset = new Vector2(x * tileW, correctedY * tileH);
                     
                     var screenPos = position + (offset * scale) - (mapSize * scale * anchor);
-
-                    CreateEntityFromTile(world, prototypes, tileDefRef.Source.Source!, name!, screenPos, tileSize * scale);
-                }
-            }
-        }
-    }
-    
-    public void Load(Hypercube.Ecs.World world, PrototypeStorage prototypes, Vector2 position, Vector2 anchor, Vector2 scale)
-    {
-        var tileW = Map.TileWidth;
-        var tileH = Map.TileHeight;
-        var tileSize = new Vector2(tileW, tileH);
-        var mapSize = new Vector2(Map.Width * tileW, Map.Height * tileH);
-
-        foreach (var layer in Map.Layers)
-        {
-            for (var y = 0; y < layer.Height; y++)
-            {
-                for (var x = 0; x < layer.Width; x++)
-                {
-                    var gid = layer.GetTileAt(new Vector2i(x, y));
-                    if (gid == 0) continue;
-                
-                    if (!_tileDefinitions.TryGetValue(gid, out var tileDefRef) || tileDefRef.TileDefinition == null)
-                        continue;
-
-                    var definition = tileDefRef.TileDefinition;
-                    var property = definition.Properties.Find(e => e.Name == "Type");
-                    if (property is null || property.Type != "string")
-                        continue;
-                
-                    var name = (property.Value is JsonElement element ? element : default).Deserialize<string>();
-
-                    var correctedY = (Map.Height - 1 - y); 
-                    var offset = new Vector2(x * tileW, correctedY * tileH);
                     
-                    var screenPos = position + (offset * scale) - (mapSize * scale * anchor);
-
                     CreateEntityFromTile(world, prototypes, tileDefRef.Source.Source!, name!, screenPos, tileSize * scale);
                 }
             }
-        }
-    }
-    
-    private void CreateEntityFromTile(Hypercube.Ecs.World world, PrototypeStorage prototypes, TiledTileset tileset, string typeName, Vector2 worldPosition, Vector2 scaledTileSize)
-    {
-        var entity = world.Create();
-        
-        world.Add(entity, new NetworkTransform { Position = worldPosition });
-        world.Add(entity, new TilesetRefComponent { Ref = tileset, Size = scaledTileSize });
-
-        if (!prototypes.TryGetPrototype(typeName, out var proto))
-            return;
-
-        foreach (var (componentName, properties) in proto)
-        {
-            if (!Components.TryGetValue(componentName, out var componentType))
-                continue;
-        
-            var component = Activator.CreateInstance(componentType);
-            if (component is null) continue;
-        
-            foreach (var (propName, propValue) in properties)
-            {
-                var field = componentType.GetField(propName);
-                if (field != null)
-                {
-                    field.SetValue(component, ConvertValue(propValue, field.FieldType));
-                    continue;
-                }
-
-                var prop = componentType.GetProperty(propName);
-                if (prop != null && prop.CanWrite)
-                {
-                    prop.SetValue(component, ConvertValue(propValue, prop.PropertyType));
-                }
-            }
-            
-            world.Add(entity, new HitboxDeclarationComponent() { ShapeType = ShapeType.Polygon}); 
         }
     }
 

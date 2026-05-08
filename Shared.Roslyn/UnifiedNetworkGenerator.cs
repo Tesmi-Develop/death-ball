@@ -130,14 +130,12 @@ public sealed class UnifiedNetworkGenerator : IIncrementalGenerator
             sb.AppendLine("                {");
             sb.AppendLine($"                    if (!world.Has<{type.FullName}>(entity)) break;");
             sb.AppendLine("");
-            sb.AppendLine($"                    var serverData = MessagePackSerializer.Deserialize<{type.FullName}_SyncData>(ref reader);");
-            sb.AppendLine("");
             sb.AppendLine("                    if (world.Has<EntityPredictHistory>(entity) &&");
             sb.AppendLine($"                        world.Get<EntityPredictHistory>(entity).Buffers.TryGetValue({i}, out var fieldBuffers))");
             sb.AppendLine("                    {");
-            sb.AppendLine("                        ref var history = ref world.Get<EntityPredictHistory>(entity);");
             sb.AppendLine($"                        ref var currentComp = ref world.Get<{type.FullName}>(entity);");
-            sb.AppendLine("");
+            sb.AppendLine("                        ref var history = ref world.Get<EntityPredictHistory>(entity);");
+            sb.AppendLine($"                        var serverData = MessagePackSerializer.Deserialize<{type.FullName}_SyncData>(ref reader);");
             sb.AppendLine("                        bool mispredicted = false;");
             sb.AppendLine("");
             sb.AppendLine("                        for (int f = 0; f < fieldBuffers.Count; f++)");
@@ -162,10 +160,9 @@ public sealed class UnifiedNetworkGenerator : IIncrementalGenerator
             sb.AppendLine("                        break;");
             sb.AppendLine("                    }");
             sb.AppendLine("");
-            sb.AppendLine($"                    var serverComp = new {type.FullName}();");
-            sb.AppendLine($"                    serverComp.Deserialize(ref reader);");
-            sb.AppendLine($"                    world.Get<{type.FullName}>(entity) = serverComp;");
-            sb.AppendLine("");
+            sb.AppendLine($"                    var newComp = new {type.FullName}();");
+            sb.AppendLine($"                    newComp.Deserialize(ref reader);");
+            sb.AppendLine($"                    world.Get<{type.FullName}>(entity) = newComp;");
             sb.AppendLine("                    break;");
             sb.AppendLine("                }");
         }

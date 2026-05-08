@@ -1,9 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using Hypercube.Core.Resources.Loaders;
-using Shared.Resources.TiledMapParts;
 using Shared.ResourcesData.TiledMapParts;
 
-namespace Shared.Resources;
+namespace Shared.ResourcesData;
 
 public class TiledMap : Resource
 {

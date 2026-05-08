@@ -1,5 +1,5 @@
 {
-    "activeFile": "arena1.tmx",
+    "activeFile": "D:/Projects/DeathBall/death-ball/resources/Atlases/utilities.tsx",
     "expandedProjectPaths": [
         "."
     ],
@@ -10,7 +10,7 @@
         },
         "D:/Projects/DeathBall/death-ball/resources/Atlases/arena1.tsx": {
             "scaleInDock": 2,
-            "scaleInEditor": 3
+            "scaleInEditor": 16
         },
         "D:/Projects/DeathBall/death-ball/resources/Atlases/utilities.tsx": {
             "scaleInDock": 11,
@@ -29,7 +29,7 @@
             }
         }
     },
-    "last.exportedFilePath": "D:/Projects/DeathBall/death-ball/resources/Atlases",
+    "last.exportedFilePath": "D:/Projects/DeathBall/death-ball/resources/TiledMaps/Arena1",
     "last.imagePath": "D:/Projects/DeathBall/death-ball/resources/Atlases/images",
     "map.height": 30,
     "map.lastUsedExportFilter": "JSON map-файлы (*.tmj *.json)",
@@ -45,9 +45,9 @@
     "project": "arena1.tiled-project",
     "property.type": "string",
     "recentFiles": [
+        "arena1.tmx",
         "D:/Projects/DeathBall/death-ball/resources/Atlases/arena1.tsx",
         "D:/Projects/DeathBall/death-ball/resources/Atlases/utilities.tsx",
-        "arena1.tmx",
         "D:/Projects/DeathBall/death-ball/resources/Atlases/arena0.tsx",
         "D:/Projects/DeathBall/death-ball/resources/atlas0.tsx"
     ],

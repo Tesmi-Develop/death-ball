@@ -1,4 +1,3 @@
-using System.Buffers;
 using Arch.Core;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
@@ -12,14 +11,14 @@ using Shared.Helpers;
 namespace Server.Systems.Network;
 
 [EcsSystem(EcsPriority.High)]
-public class NetworkClientPacketSystem : BaseSystem
+public class NetworkClientEntitySystem : BaseSystem
 {
     [Dependency] private readonly IEventBus _eventBus = null!;
     [Dependency] private readonly Logger _logger = null!;
     [Dependency] private readonly NetworkServer _networkServer = null!;
     
     private readonly QueryDescription _query = new QueryDescription().WithAll<ClientData>();
-    private readonly ArrayBufferWriter<byte> _bufferWriter = new(1024);
+    private readonly Dictionary<long, Entity> _clients = [];
 
     public override void Initialize()
     {
@@ -27,12 +26,37 @@ public class NetworkClientPacketSystem : BaseSystem
         {
             RegisterClientEntity(args.ClientConnection);
         });
+        
+        _eventBus.Subscribe((ref ClientDisconnected args) =>
+        {
+            if (!_clients.TryGetValue(args.ClientConnection.Id, out var entity))
+                return;
+            
+            _eventBus.Raise<ClientData, ClientEntityRemoved>(entity, new ClientEntityRemoved());
+            DestroyClientEntity(args.ClientConnection.Id);
+        }, EventBusPriority.Lowest);
+    }
+
+    public Entity GetClientEntity(long clientId)
+    {
+        return  _clients[clientId];
+    }
+
+    private void DestroyClientEntity(long clientId)
+    {
+        if (!_clients.TryGetValue(clientId, out var entity))
+            return;
+        
+        world.Destroy(entity);
+        _clients.Remove(clientId);
+        _logger.Debug($"Client {clientId} has been destroyed");
     }
 
     private void RegisterClientEntity(ClientConnection clientConnection)
     {
         var entity = world.Create();
         world.Add(entity, new ClientData { ClientConnection = clientConnection, Id = clientConnection.Id });
+        _clients.Add(clientConnection.Id, entity);
         
         _eventBus.Raise<ClientData, NewEntityClient>(entity, new NewEntityClient { ClientEntity = entity });
     }

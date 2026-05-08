@@ -10,7 +10,6 @@ using Server.Extensions;
 using Server.Helpers;
 using Server.Utilities;
 using Shared.Components;
-using Shared.Data;
 
 namespace Server.Systems;
 
@@ -39,7 +38,7 @@ public class TestSystem : BaseSystem
                 world.Add(entity2, new TargetLocation() { Location = Vector2.One });
             }
         });*/
-        Task.Run(async () =>
+        /*Task.Run(async () =>
         {
             await Task.Delay(5000);
             var size = new Vector2(32, 32);
@@ -51,7 +50,7 @@ public class TestSystem : BaseSystem
                 world.AddCollision(entity2, size, isStatic: true);
                 pos += new Vector2(size.X, 0);
             }
-        });
+        });*/
  
         _query = new QueryDescription().WithAll<NetworkTransform, TargetLocation>();
     }

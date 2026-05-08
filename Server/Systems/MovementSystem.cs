@@ -38,7 +38,6 @@ public class MovementSystem : BaseSystem
             
             transform.Position += inputData.Direction * speed.Value;
             NetworkHelper.MakeDirty<NetworkTransform>(world, characterEntity);
-            Console.WriteLine(1);
         });
     }
 }

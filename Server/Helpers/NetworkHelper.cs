@@ -79,6 +79,9 @@ public static class NetworkHelper
         if (inputData.Tick != tick)
             return false;
         
+        if (inputData.Input is null)
+            return false;
+        
         input = (T)inputData.Input;
         return true;
     }

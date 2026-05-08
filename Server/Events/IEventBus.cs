@@ -5,13 +5,13 @@ namespace Server.Events;
 
 public interface IEventBus
 {
-    void Subscribe<TComponent, TEvent>(Handling.EventHandler<TComponent, TEvent> handler, EventBusPriority priority = EventBusPriority.NoPriority)
+    void Subscribe<TComponent, TEvent>(Handling.EventHandler<TComponent, TEvent> handler, EventBusPriority priority = EventBusPriority.Default)
         where TEvent : struct, IEvent;
 
     void Unsubscribe<TComponent, TEvent>(Handling.EventHandler<TComponent, TEvent> handler)
         where TEvent : struct, IEvent;
     
-    void Subscribe<TEvent>(Handling.EventHandler<TEvent> handler, EventBusPriority priority = EventBusPriority.NoPriority)
+    void Subscribe<TEvent>(Handling.EventHandler<TEvent> handler, EventBusPriority priority = EventBusPriority.Default)
         where TEvent : struct, IEvent;
 
     void Unsubscribe<TEvent>(Handling.EventHandler<TEvent> handler)

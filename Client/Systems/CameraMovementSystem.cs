@@ -1,6 +1,5 @@
 ﻿using Hypercube.Core.Ecs;
 using Hypercube.Core.Execution.LifeCycle;
-using Hypercube.Core.Systems.Transform;
 using Hypercube.Core.Viewports;
 using Hypercube.Ecs.Queries;
 using Hypercube.Utilities.Dependencies;

@@ -1,12 +1,10 @@
-﻿using Client.LifeCycles;
-using Hypercube.Core.Ecs;
+﻿using Hypercube.Core.Ecs;
 using Hypercube.Core.Execution.LifeCycle;
 using Hypercube.Ecs;
 using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics.Shapes;
 using Hypercube.Mathematics.Vectors;
 using Shared.Components;
-using Shared.Components.Commands;
 
 namespace Client.Systems.Collisions;
 

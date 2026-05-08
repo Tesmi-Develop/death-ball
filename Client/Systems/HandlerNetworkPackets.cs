@@ -11,7 +11,7 @@ public class HandlerNetworkPackets : EntitySystem
     [Dependency] private readonly GameClient _gameClient = null!;
     private const int MaxPacketPerUpdate = 60;
     private List<Packet> _packetBuffer = new(128);
-
+    
     public override void Update(FrameEventArgs deltaTime)
     {
         var counter = 0;

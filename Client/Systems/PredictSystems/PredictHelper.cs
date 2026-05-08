@@ -11,7 +11,7 @@ public class PredictHelper : EntitySystem
 {
     public const int Capacity = 60;
     
-    public void PredictField<T>(Entity entity, string fieldName) where T : unmanaged, IComponent
+    public void PredictField<T>(Entity entity, string fieldName) where T : struct, IComponent 
     {
         if (!World.Has<EntityPredictHistory>(entity))
             World.Add(entity, new EntityPredictHistory());
@@ -29,7 +29,22 @@ public class PredictHelper : EntitySystem
         if (fieldInfo is null)
             throw new ArgumentException($"Field '{fieldName}' not found in component {typeof(T).Name}");
         
+        if (!IsUnmanaged(fieldInfo.FieldType))
+            throw new ArgumentException($"Field '{fieldName}' is not a unmanage type");
+        
         var buffer = FieldHistoryHelper.CreateFieldBuffer<T>(fieldInfo, Capacity); 
         fields.Add(buffer);
+    }
+    
+    private bool IsUnmanaged(Type type)
+    {
+        if (type.IsPrimitive || type.IsEnum)
+            return true;
+        
+        if (!type.IsValueType)
+            return false;
+        
+        return type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .All(f => IsUnmanaged(f.FieldType));
     }
 }

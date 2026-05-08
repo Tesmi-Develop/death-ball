@@ -1,12 +1,9 @@
 ﻿using Arch.Core;
 using Hypercube.Mathematics.Vectors;
 using Hypercube.Physics;
-using Hypercube.Physics.Shapes.Structs;
 using Hypercube.Physics.Manifolds;
 using Hypercube.Utilities.Dependencies;
 using Shared.Components;
-using Shared.Components.Commands;
-using Shared.Data;
 
 namespace Server.Systems;
 
@@ -23,7 +20,7 @@ public class CollisionSystem : BaseSystem
     {
         world.Query(in _movableQuery, (Entity entity, ref NetworkTransform trans, ref HitboxComponent hitbox) =>
         {
-            if (hitbox.IsStatic || hitbox.IsTrigger || !hitbox.GridIndex.HasValue) 
+            if (hitbox.IsStatic || !hitbox.GridIndex.HasValue) 
                 return;
 
             _neighborBuffer.Clear();
@@ -33,7 +30,7 @@ public class CollisionSystem : BaseSystem
             {
                 if (entity == neighbor) 
                     continue;
-
+                
                 ResolveCollision(entity, neighbor);
             }
         });
@@ -47,8 +44,11 @@ public class CollisionSystem : BaseSystem
         ref var hitboxA = ref world.Get<HitboxComponent>(entityA);
         ref var hitboxB = ref world.Get<HitboxComponent>(entityB);
         
-        if (hitboxA.IsTrigger || hitboxB.IsTrigger)
-            return Manifold.Empty;
+        //Console.WriteLine(transformA.Position);
+        //Console.WriteLine(transformB.Position);
+        
+        /*if (hitboxB.IsTrigger)
+            return Manifold.Empty;*/
         
         var manifold = GetManifold(ref transformA, ref hitboxA, ref transformB, ref hitboxB);
         if (manifold.IsEmpty)
@@ -72,8 +72,6 @@ public class CollisionSystem : BaseSystem
         if (!hitboxB.IsStatic)
             transformB.Position -= correction;
         
-        Console.WriteLine(2);
-        Console.WriteLine(correction);
         transformA.Position += correction;
         return manifold;
     }

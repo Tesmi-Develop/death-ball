@@ -9,5 +9,4 @@ public enum EventBusPriority : int
     BelowNormal = 1500,
     Low = 1000,
     Lowest = 0,
-    NoPriority = -1,
 }

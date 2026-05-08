@@ -5,9 +5,9 @@ using Hypercube.Ecs.Queries;
 using Hypercube.Utilities.Dependencies;
 using Shared.Components;
 
-namespace Client.Systems;
+namespace Client.Systems.Givers;
 
-public class CharacterGiverPredict : EntitySystem
+public class CharacterGiverPredictSystem : EntitySystem
 {
     [Dependency] private readonly PredictHelper _predictHelper = null!;
     [Dependency] private readonly GameClient _gameClient = null!;

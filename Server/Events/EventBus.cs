@@ -14,7 +14,7 @@ public sealed class EventBus : IEventBus
 
     #region Broadcast
     
-    public void Subscribe<TEvent>(Handling.EventHandler<TEvent> handler, EventBusPriority priority = EventBusPriority.NoPriority)
+    public void Subscribe<TEvent>(Handling.EventHandler<TEvent> handler, EventBusPriority priority = EventBusPriority.Default)
         where TEvent : struct, IEvent
     {
         var signature = typeof(TEvent);
@@ -74,7 +74,7 @@ public sealed class EventBus : IEventBus
 
     #endregion
     
-    public void Subscribe<TComponent, TEvent>(Handling.EventHandler<TComponent, TEvent> handler, EventBusPriority priority = EventBusPriority.NoPriority)
+    public void Subscribe<TComponent, TEvent>(Handling.EventHandler<TComponent, TEvent> handler, EventBusPriority priority = EventBusPriority.Default)
         where TEvent : struct, IEvent
     {
         var signature = new EventSignature(Component<TComponent>.ComponentType, typeof(TEvent));

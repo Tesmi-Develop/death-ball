@@ -2,6 +2,6 @@
 
 public struct InputData
 {
-    public object Input;
+    public object? Input;
     public long Tick;
 }

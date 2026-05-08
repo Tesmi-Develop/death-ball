@@ -1,4 +1,5 @@
 using Hypercube.Ecs;
+using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics.Vectors;
 using Hypercube.Physics.Shapes;
 using Hypercube.Physics.Shapes.Structs;
@@ -16,9 +17,9 @@ public static class WorldExtensions
             
             world.Add(entity, new HitboxComponent
             {
-                Shape = new ShapeUnionTyped()
+                Shape = new ShapeUnionTyped
                 {
-                    Shape = new ShapeUnion()
+                    Shape = new ShapeUnion
                     {
                         Polygon = ShapePolygon.CreateRectangle(size / 2f)
                     },
@@ -29,6 +30,15 @@ public static class WorldExtensions
                 Offset = offset.Value,
             });
         }
+
+        public List<Entity> CollectEntities(Query query, List<Entity> entities)
+        {
+            if (entities.Count > 0)
+                entities.Clear();
+            
+            query.ForEach(entities.Add);
+            return entities;
+        }
         
         public void AddCollision(Entity entity, float radius, Vector2? offset, bool isTrigger = false, bool isStatic = false)
         {
@@ -36,9 +46,9 @@ public static class WorldExtensions
             
             world.Add(entity, new HitboxComponent
             {
-                Shape = new ShapeUnionTyped()
+                Shape = new ShapeUnionTyped
                 {
-                    Shape = new ShapeUnion()
+                    Shape = new ShapeUnion
                     {
                         Circle = new ShapeCircle
                         {

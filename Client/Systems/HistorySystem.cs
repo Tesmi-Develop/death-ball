@@ -1,6 +1,5 @@
 ﻿using Hypercube.Core.Ecs;
 using Hypercube.Core.Execution.LifeCycle;
-using Hypercube.Core.Input;
 using Hypercube.Core.Input.Handler;
 using Hypercube.Utilities.Dependencies;
 

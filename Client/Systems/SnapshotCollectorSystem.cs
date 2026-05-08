@@ -15,7 +15,7 @@ public class SnapshotCollectorSystem : EntitySystem, IServerUpdate
     
     public override void Initialize()
     {
-        _query = GetQuery().WithAll<NetworkTransform, InterpolationComponent>().Build();
+        _query = GetQuery().WithAll<NetworkTransform, Interpolation>().Build();
     }
     
     public override void Update(FrameEventArgs args)
@@ -25,7 +25,7 @@ public class SnapshotCollectorSystem : EntitySystem, IServerUpdate
 
     public void ServerUpdate(long serverTick, long predictTick)
     {
-        _query.With<NetworkTransform, InterpolationComponent>((entity, ref networkTransform, ref interpolation) =>
+        _query.With<NetworkTransform, Interpolation>((entity, ref networkTransform, ref interpolation) =>
         {
             var pos = networkTransform.Position;
             

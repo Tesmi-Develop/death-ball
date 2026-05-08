@@ -1,10 +1,12 @@
-﻿using Client.LifeCycles;
+﻿using System.Reflection;
+using Client.LifeCycles;
 using Hypercube.Core.Ecs;
 using Hypercube.Core.Execution.LifeCycle;
 using Hypercube.Ecs;
 using Hypercube.Ecs.Queries;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
+using Shared.Attributes;
 using Shared.Components;
 
 namespace Client.Systems.PredictSystems;
@@ -30,19 +32,30 @@ public class ServerUpdateHandlerSystem : EntitySystem
     public override void Initialize()
     {
         _query = GetQuery().WithAll<EntityPredictHistory>().Build();
-        
-        var interfaceType = typeof(IServerUpdate);
-        var types = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(s => s.GetTypes())
-            .Where(p => interfaceType.IsAssignableFrom(p) && p is { IsClass: true, IsAbstract: false });
 
-        foreach (var type in types)
+        var interfaceType = typeof(IServerUpdate);
+        var updateMethodName = nameof(IServerUpdate.ServerUpdate);
+
+        var systems = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(s => s.GetTypes())
+            .Where(p => interfaceType.IsAssignableFrom(p) && p is { IsClass: true, IsAbstract: false })
+            .Select(type => 
+            {
+                var method = type.GetMethod(updateMethodName);
+                var priority = method?.GetCustomAttribute<PriorityAttribute>()?.Priority ?? 0;
+                return new { Type = type, Priority = priority };
+            })
+            .OrderByDescending(x => x.Priority)
+            .ToList();
+
+        foreach (var item in systems)
         {
-            var instance = _dependenciesContainer.Resolve(type);
-            if (instance is IServerUpdate serverUpdate)
-                _serverUpdates.Add(serverUpdate);
+            if (_dependenciesContainer.Resolve(item.Type) is IServerUpdate instance)
+            {
+                _serverUpdates.Add(instance);
+            }
         }
-        
+
         _runtimeLoop.Actions.Add(OnUpdate, EngineUpdatePriority.RendererUpdate);
     }
 

@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Hypercube.Physics.Shapes;
-using Hypercube.Physics.Shapes.Structs;
 using MessagePack;
 using MessagePack.Formatters;
 

@@ -23,7 +23,7 @@ public sealed class ShapePolygonFormatter : IMessagePackFormatter<ShapePolygon>
         if (reader.IsNil) return default;
         reader.ReadArrayHeader();
 
-        return new ShapePolygon()
+        return new ShapePolygon
         {
             Vertices = options.Resolver.GetFormatterWithVerify<FixedArray8<Vector2>>().Deserialize(ref reader, options),
             Normals = options.Resolver.GetFormatterWithVerify<FixedArray8<Vector2>>().Deserialize(ref reader, options),

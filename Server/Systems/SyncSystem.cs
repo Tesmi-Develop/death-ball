@@ -10,7 +10,7 @@ using Server.Components;
 using Server.Components.Events;
 using Server.Events;
 using Server.Helpers;
-using Shared.Components;
+using Shared.Attributes;
 using Shared.Data;
 using Shared.NetworkUtilities;
 
@@ -50,17 +50,20 @@ public class SyncSystem : BaseSystem
 
         void Handler(in Entity entity, ref T comp) 
         {
+            Console.WriteLine($"Added {typeof(T).Name}");
             world.Add<NetworkEntityTag>(entity);
             _additionalQueue.Enqueue((entity, netId));
         }
     }
 
-    public override void Initialize()
+    [Priority(EcsPriority.High - 1)]
+    public override void PreInitialize()
     {
         var networkComponents = NetworkHelper.GetNetworkComponentMetadata(world);
 
         foreach (var (netId, type) in networkComponents.ComponentsById)
         {
+            _logger.Trace($"Registering {type.Name}");
             var method = GetType().GetMethod(nameof(RegisterRemovalHook), 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
         
@@ -194,6 +197,10 @@ public class SyncSystem : BaseSystem
     
     private void SerializeAddedComponents()
     {
+        if (_additionalQueue.IsEmpty)
+            return;
+        
+        _logger.Trace("Start serialize added components");
         _tempBuffer.Clear();
         var writer = new MessagePackWriter(_tempBuffer);
         
@@ -201,19 +208,20 @@ public class SyncSystem : BaseSystem
         
         while (_additionalQueue.TryDequeue(out var result))
         {
-            var (entity, netId) = result;
+            var (entity, componentId) = result;
             if (!world.IsAlive(entity)) 
                 continue;
 
             writer.WriteInt64(entity.GetFullMask());
-            writer.WriteInt32(netId);
+            writer.WriteInt32(componentId);
             writer.Flush();
             
-            var componentType = NetworkHelper.GetNetworkComponentById(world, netId);
+            var componentType = NetworkHelper.GetNetworkComponentById(world, componentId);
             var synced = (ISynced)world.Get(entity, componentType)!;
             synced.Serialize(_tempBuffer, null);
             writer = new MessagePackWriter(_tempBuffer);
             
+            _logger.Trace($"Wrote {componentType.Name}, entityMask: {entity.GetFullMask()}");
             actualCount++;
         }
         
@@ -265,7 +273,6 @@ public class SyncSystem : BaseSystem
         if (_bufferWriter.WrittenCount <= 3) 
             return;
         
-        Console.WriteLine(3);
         var packet = new Packet
         {
             PacketType = packetType,

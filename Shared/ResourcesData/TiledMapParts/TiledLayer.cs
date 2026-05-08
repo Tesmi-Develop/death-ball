@@ -1,6 +1,7 @@
 ﻿using Hypercube.Mathematics.Vectors;
+using Shared.ResourcesData.TiledTilesetParts;
 
-namespace Shared.Resources.TiledMapParts;
+namespace Shared.ResourcesData.TiledMapParts;
 
 public class TiledLayer
 {
@@ -10,6 +11,7 @@ public class TiledLayer
     public string Name { get; set; }
     public string Type { get; set; }
     public bool Visible { get; set; }
+    public List<Property> Properties { get; set; } = [];
 
     public int GetTileAt(Vector2i point)
     {

@@ -1,5 +1,4 @@
 ﻿using Hypercube.Mathematics.Vectors;
-using Hypercube.Physics.Shapes.Structs;
 using Hypercube.Utilities.Collections;
 using MessagePack;
 using MessagePack.Formatters;
