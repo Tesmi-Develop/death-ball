@@ -18,62 +18,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c7b2eb-22e8-441c-b205-3258787a3c4a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Client/InternalSystems/EntrySystem.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Client/Utilities/BaseSystem.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/Utilities/BaseSystem.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shared/SharedSystemRealisation/BaseSystem.Ecs.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shared/SharedSystemRealisation/SharedSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/LifeCycles/IServerUpdate.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/CameraMovementSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/CameraMovementSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/CharacterSystems/CharacterBypassInterpolationSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/CharacterSystems/CharacterBypassInterpolationSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/CharacterSystems/CharacterControllerSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/CharacterSystems/CharacterControllerSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/Collisions/CollisionDebugRenderSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/Collisions/CollisionDebugRenderSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/Collisions/CollisionSystem.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/Collisions/CollisionWorldSystem.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/Collisions/TestCollisionsSystem.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/DrawChunks.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/DrawChunks.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/GameHelperSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/GameHelperSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/Givers/CharacterGiverPredictSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/Givers/CharacterGiverPredictSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/Givers/InterpolationGiverSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/Givers/InterpolationGiverSystem.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.DeathBall/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DeathBall/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Client/InternalSystems/FieldHistorySystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/InternalSystems/FieldHistorySystem.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Client/Systems/Givers/SpriteGiverSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/Givers/SpriteGiverSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/Givers/TransformGiverSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/Givers/TransformGiverSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/HandlerNetworkPackets.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/HandlerNetworkPackets.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/HandlerSync.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/HandlerSync.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/HistorySystem.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/InterpolationTransformComponentSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/InterpolationTransformComponentSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/MapRender.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/MapRender.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/NetworkHelper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/NetworkHelper.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/PingDrawSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/PingDrawSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/PredictSystems/FieldHistorySystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/InternalSystems/FieldHistorySystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/PredictSystems/InputStorage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/InternalSystems/InputStorage.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/PredictSystems/PredictHelper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/PredictSystems/PredictHelper.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/PredictSystems/ServerUpdateHandlerSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/InternalSystems/PredictSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/SnapshotCollectorSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/SnapshotCollectorSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/SpawnLocalCharacterSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/SpawnLocalCharacterSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/TilesetRefHandlerSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/TilesetRefHandlerSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DungeonGame.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/DungeonGame.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/BaseSystem.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/EcsPriority.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Shared/SharedSystemRealisation/EcsPriority.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/EcsSystemAttribute.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Shared/SharedSystemRealisation/EcsSystemAttribute.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/EcsSystemHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/EcsSystemEntry.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Extensions/WorldExtensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Extensions/WorldExtensions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Helpers/NetworkHelper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Helpers/NetworkHelper.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/CollisionSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Shared/Systems/Collisions/CollisionSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/CollisionWorldSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Shared/Systems/Collisions/CollisionWorldSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/DestroySystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/DestroySystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/LoadArenaTest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/LoadArenaTest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/MovementSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/MovementSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/Network/HandleIncomingClientPacketsSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/Network/HandleIncomingClientPacketsSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/Network/NetworkClientEntitySystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/Network/NetworkClientEntitySystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/Network/NetworkServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/Network/NetworkServer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/NetworkMetadataSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/NetworkMetadataSystem.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/Extensions/EntityExtensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Extensions/EntityExtensions.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Server/Systems/SpawnerPlayerCharacterSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/SpawnerPlayerCharacterSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/SyncSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/SyncSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/TestSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/TestSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/TilesetRefHandlerSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/TilesetRefHandlerSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/UnitTestSystem.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Shared/LatencyProxy.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Shared/LatencyProxy.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Shared/Systems/Collisions/CollisionWorldSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Shared/Systems/Collisions/CollisionWorldSystem.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/src/Hypercube.Core/Ecs/EntitySystemManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/src/Hypercube.Core/Ecs/EntitySystemManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/src/Hypercube.Core/Execution/RuntimeExceptionHandling.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/src/Hypercube.Core/Execution/RuntimeExceptionHandling.cs" afterDir="false" />
@@ -102,7 +52,6 @@
       <change beforePath="$PROJECT_DIR$/hypercube/src/Hypercube.Physics/Collide.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/src/Hypercube.Physics/Collide.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/src/Hypercube.Physics/PhysicsMath.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/src/Hypercube.Physics/PhysicsMath.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/submodules/ecs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/submodules/ecs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hypercube/submodules/ecs/src/Hypercube.Ecs/EntityLocation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/submodules/ecs/src/Hypercube.Ecs/EntityLocation.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/submodules/ecs/src/Hypercube.Ecs/World.Dynamic.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/submodules/ecs/src/Hypercube.Ecs/World.Dynamic.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/submodules/ecs/src/Hypercube.Ecs/World.Entities.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/submodules/ecs/src/Hypercube.Ecs/World.Entities.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/submodules/mathematics" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/submodules/mathematics" afterDir="false" />
@@ -297,33 +246,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Project.Client.executor": "Run",
-    ".NET Project.Client2.executor": "Run",
-    ".NET Project.Rainclipse.executor": "Run",
-    ".NET Project.Server.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "XThreadsFramesViewSplitterKey": "0.29953918",
-    "cidr.known.project.marker": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "shared-systems",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "configurable.group.appearance",
-    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\JetBrains Rider 2026.1.0.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Project.Client.executor&quot;: &quot;Run&quot;,
+    &quot;.NET Project.Client2.executor&quot;: &quot;Run&quot;,
+    &quot;.NET Project.Rainclipse.executor&quot;: &quot;Run&quot;,
+    &quot;.NET Project.Server.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.29953918&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;shared-systems&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\JetBrains Rider 2026.1.0.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
-  <component name="RunManager" selected="Compound.Server + Client">
+}</component>
+  <component name="RunManager" selected=".NET Project.Server">
     <configuration name="Server + Client" type="CompoundRunConfigurationType">
       <toRun name="Client" type="DotNetProject" />
       <toRun name="Server" type="DotNetProject" />
@@ -441,7 +390,7 @@
       <workItem from="1778142616253" duration="17512000" />
       <workItem from="1778237493259" duration="16494000" />
       <workItem from="1778254271436" duration="7955000" />
-      <workItem from="1778292964187" duration="38881000" />
+      <workItem from="1778292964187" duration="40227000" />
     </task>
     <servers />
   </component>

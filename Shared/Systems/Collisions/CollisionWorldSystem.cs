@@ -24,7 +24,6 @@ public class CollisionWorldSystem : SharedSystem
         
         Subscribe((Entity entity, ref HitboxComponent hitbox, ref RemovedEvent args) =>
         {
-            Console.WriteLine("removed hitbox");
             UnregisterEntity(entity, ref hitbox);
         });
     }

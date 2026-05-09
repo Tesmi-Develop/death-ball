@@ -3,7 +3,7 @@ using Hypercube.Ecs.Queries;
 using Hypercube.Utilities.Dependencies;
 using Shared.Components;
 
-namespace Client.Systems.PredictSystems;
+namespace Client.InternalSystems;
 
 public class FieldHistorySystem : EntitySystem
 {

@@ -79,6 +79,5 @@ public class SpawnerPlayerCharacterSystem : BaseSystem
             return;
         
         World.Delete(controlled.Reference);
-        _logger.Debug($"Player character with id {clientData.Id}");
     }
 }
