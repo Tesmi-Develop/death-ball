@@ -1,3 +1,5 @@
+using Hypercube.Ecs.Components;
+
 namespace Server.Components;
 
-public struct NetworkEntityTag;
+public struct NetworkEntityTag : IComponent;

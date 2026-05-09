@@ -1,6 +1,10 @@
 using System.Buffers;
 using System.Collections.Concurrent;
-using Arch.Core;
+using Hypercube.Ecs;
+using Hypercube.Ecs.Components;
+using Hypercube.Ecs.Events;
+using Hypercube.Ecs.Lifetime;
+using Hypercube.Ecs.Queries;
 using Server.Extensions;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
@@ -8,10 +12,10 @@ using LiteNetLib;
 using MessagePack;
 using Server.Components;
 using Server.Components.Events;
-using Server.Events;
 using Server.Helpers;
 using Shared.Attributes;
 using Shared.Data;
+using Shared.Extensions;
 using Shared.NetworkUtilities;
 
 namespace Server.Systems;
@@ -22,35 +26,34 @@ public class SyncSystem : BaseSystem
     [Dependency] private readonly ILogger _logger = null!;
     [Dependency] private readonly IEventBus _eventBus = null!;
     
-    private readonly QueryDescription _query = new QueryDescription().WithAll<Dirty>();
-    private readonly QueryDescription _clientQuery = new QueryDescription().WithAll<ClientData>();
-    private readonly QueryDescription _syncQuery = new QueryDescription().WithAll<NetworkEntityTag>();
+    private Query _query = null!;
+    private Query _clientQuery = null!;
+    private Query _syncQuery = null!;
     private readonly ArrayBufferWriter<byte> _bufferWriter = new(1024); 
     private readonly ConcurrentQueue<(Entity entity, int NetId)> _removalQueue = [];
     private readonly ConcurrentQueue<(Entity entity, int NetId)> _additionalQueue = [];
     private readonly ConcurrentQueue<long> _destroyedEntities = [];
     private readonly List<Entity> _tempEntityList = [];
-    private readonly ArrayBufferWriter<byte> _tempBuffer = new ArrayBufferWriter<byte>(1024);
+    private readonly ArrayBufferWriter<byte> _tempBuffer = new (1024);
     
-    private void RegisterRemovalHook<T>(int netId) where T : struct
+    private void RegisterRemovalHook<T>(int netId) where T : struct, IComponent
     {
-        world.SubscribeComponentRemoved<T>(Handler);
+        _eventBus.Subscribe<T, RemovedEvent>(Handler);
         return;
 
-        void Handler(in Entity entity, ref T comp) 
+        void Handler(Entity entity, ref T comp, ref RemovedEvent args) 
         {
             _removalQueue.Enqueue((entity, netId));
         }
     }
     
-    private void RegisterAddedHook<T>(int netId) where T : struct
+    private void RegisterAddedHook<T>(int netId) where T : struct, IComponent
     {
-        world.SubscribeComponentAdded<T>(Handler);
+        _eventBus.Subscribe<T, AddedEvent>(Handler);
         return;
 
-        void Handler(in Entity entity, ref T comp) 
+        void Handler(Entity entity, ref T comp, ref AddedEvent args) 
         {
-            Console.WriteLine($"Added {typeof(T).Name}");
             world.Add<NetworkEntityTag>(entity);
             _additionalQueue.Enqueue((entity, netId));
         }
@@ -59,6 +62,10 @@ public class SyncSystem : BaseSystem
     [Priority(EcsPriority.High - 1)]
     public override void PreInitialize()
     {
+        _query = GetQuery().WithAll<Dirty>().Build();
+        _clientQuery = GetQuery().WithAll<ClientData>().Build();
+        _syncQuery = GetQuery().WithAll<NetworkEntityTag>().Build();
+    
         var networkComponents = NetworkHelper.GetNetworkComponentMetadata(world);
 
         foreach (var (netId, type) in networkComponents.ComponentsById)
@@ -77,7 +84,7 @@ public class SyncSystem : BaseSystem
             genericMethod.Invoke(this, [netId]);
         }
         
-        world.SubscribeComponentRemoved((in Entity entity, ref NetworkEntityTag _) =>
+        _eventBus.Subscribe((Entity entity, ref NetworkEntityTag _, ref RemovedEvent _) =>
         {
             _destroyedEntities.Enqueue(entity.GetFullMask());
         });
@@ -93,10 +100,10 @@ public class SyncSystem : BaseSystem
         var networkComponents = NetworkHelper.GetNetworkComponentMetadata(world);
         _bufferWriter.Clear();
 
-        var counts = world.CountEntities(in _syncQuery);
+        var counts = world.CountEntities(_syncQuery);
         MessagePackSerializer.Serialize(_bufferWriter, counts);
         
-        world.Query(in _syncQuery, entity =>
+        _syncQuery.ForEach(entity =>
         {
             MessagePackSerializer.Serialize(_bufferWriter, entity.GetFullMask());
             
@@ -177,7 +184,7 @@ public class SyncSystem : BaseSystem
         while (_removalQueue.TryDequeue(out var result))
         {
             var (entity, netId) = result;
-            if (!world.IsAlive(entity)) 
+            if (!world.Validate(entity)) 
                 continue;
 
             writer.WriteInt64(entity.GetFullMask());
@@ -209,7 +216,7 @@ public class SyncSystem : BaseSystem
         while (_additionalQueue.TryDequeue(out var result))
         {
             var (entity, componentId) = result;
-            if (!world.IsAlive(entity)) 
+            if (!world.Validate(entity)) 
                 continue;
 
             writer.WriteInt64(entity.GetFullMask());
@@ -237,12 +244,12 @@ public class SyncSystem : BaseSystem
 
     private void SerializeDirtyChanges()
     {
-        var dirtyEntitiesCount = world.CountEntities(in _query);
+        var dirtyEntitiesCount = world.CountEntities(_query);
         MessagePackSerializer.Serialize(_bufferWriter, dirtyEntitiesCount);
-
+        
         _tempEntityList.Clear(); 
 
-        world.Query(in _query, (Entity entity, ref Dirty dirty) =>
+        _query.With((Entity entity, ref Dirty dirty) =>
         {
             _tempEntityList.Add(entity);
             MessagePackSerializer.Serialize(_bufferWriter, entity.GetFullMask());
@@ -286,7 +293,7 @@ public class SyncSystem : BaseSystem
 
     private void PushAllClientsSyncData(Packet packet)
     {
-        world.Query(in _clientQuery, (Entity _, ref ClientData payload) =>
+        _clientQuery.With((Entity _, ref ClientData payload) =>
         {
             payload.PendingPackets.Enqueue(packet);
         });

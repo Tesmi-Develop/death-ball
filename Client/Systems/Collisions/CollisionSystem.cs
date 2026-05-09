@@ -122,9 +122,10 @@ public class CollisionSystem : EntitySystem, IServerUpdate
                 if (entity == neighbor) 
                     continue;
 
-               // ResolveCollision(entity, neighbor);
+                ResolveCollision(entity, neighbor);
             }
         });
+        
     }
     
     public override void Update(FrameEventArgs args)

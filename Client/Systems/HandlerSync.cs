@@ -5,6 +5,7 @@ using Hypercube.Ecs;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using MessagePack;
+using Shared.Components;
 using Shared.Data;
 
 namespace Client.Systems;
@@ -53,7 +54,7 @@ public class HandlerSync : EntitySystem
         _logger.Trace("Start hydrate");
         var reader = new MessagePackReader(payload);
         var countEntities = reader.ReadInt32();
-
+        
         for (var i = 0; i < countEntities; i++)
         {
             var entityMask = reader.ReadInt64();
@@ -81,6 +82,7 @@ public class HandlerSync : EntitySystem
         {
             var skipDirty = false;
             var entityId = reader.ReadInt64();
+            
             if (!HasNetworkEntity(entityId))
             {
                 skipDirty = true;
@@ -99,6 +101,8 @@ public class HandlerSync : EntitySystem
                     NetworkFactory.PatchComponentFromPayload(componentId, entity, World, packetServerTick, ref reader);
                     _serverUpdateHandlerSystem.ReconcileState(entity);
                 }
+                else
+                    reader.Skip();
             }
         }
     }

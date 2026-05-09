@@ -4,6 +4,7 @@ using Hypercube.Core.Execution.LifeCycle;
 using Hypercube.Ecs.Queries;
 using Hypercube.Physics.Shapes;
 using Shared.Components;
+using Shared.Extensions;
 
 namespace Client.Systems;
 

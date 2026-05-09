@@ -1,10 +1,10 @@
-﻿using Arch.Core;
-using Hypercube.Core;
+﻿using Hypercube.Core;
 using Hypercube.Core.Resources;
+using Hypercube.Ecs;
+using Hypercube.Ecs.Events;
 using Hypercube.Physics;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
-using Server.Events;
 using Server.Utilities;
 using Shared.Helpers;
 
@@ -24,6 +24,7 @@ public static class Program
     
     public static void Main()
     {
+        Thread.CurrentThread.Name = "Main";
         var dependenciesContainer = new DependenciesContainer();
         
         Contacts.Initialize();
@@ -31,8 +32,8 @@ public static class Program
         InitResourceManager(dependenciesContainer);
         
         var logger = new ConsoleLogger();
-        var world = World.Create();
-        var eventBus = new EventBus();
+        var world = new World();
+        var eventBus = world.Events;
         var time = new Time();
         
         dependenciesContainer.RegisterSingleton<IEventBus>(eventBus);

@@ -1,12 +1,14 @@
-﻿using Arch.Core;
+﻿using Hypercube.Ecs;
+using Hypercube.Ecs.Events;
+using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics.Vectors;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using Server.Components;
 using Server.Components.Events;
-using Server.Events;
 using Server.Extensions;
 using Shared.Components;
+using Shared.Extensions;
 
 namespace Server.Systems;
 
@@ -15,35 +17,41 @@ public class SpawnerPlayerCharacterSystem : BaseSystem
 {
     [Dependency] private readonly ILogger _logger = null!;
     [Dependency] private readonly IEventBus _eventBus = null!;
-    private QueryDescription _queryDescription = new QueryDescription().WithAll<PlayerSpawner, NetworkTransform>();
-    private QueryDescription _queryPlayers = new QueryDescription().WithAll<ClientData>().WithNone<ControlledEntity>();
-    
+    private Query _queryDescription = null!;
+    private Query _queryPlayers = null!;
+
+    public override void PreInitialize()
+    {
+        _queryDescription = GetQuery().WithAll<PlayerSpawner, NetworkTransform>().Build();
+        _queryPlayers = GetQuery().WithAll<ClientData>().WithNone<ControlledEntity>().Build();
+    }
+
     public override void Initialize()
-    { 
+    {
         _eventBus.Subscribe((Entity playerEntity, ref ClientData playerData, ref NewEntityClient _) =>
         {
             InitiateSpawnPlayerCharacters();
+        });
+        
+        _eventBus.Subscribe((Entity clientEntity, ref ClientData clientData, ref ClientEntityRemoved _) =>
+        {
+            DespawnPlayerCharacter(clientEntity);
         });
     }
 
     public void InitiateSpawnPlayerCharacters()
     {
         var entity = world.GetFirstEntity(_queryDescription);
-        if (entity == Entity.Null)
+        if (entity == Entity.Invalid)
         {
             _logger.Warning("Not found player spawner entity");
             return;
         }
         
-        world.Query(in _queryPlayers, (Entity clientEntity, ref ClientData clientData) =>
+        _queryPlayers.With((Entity clientEntity, ref ClientData clientData) =>
         {
             var networkTransform = world.Get<NetworkTransform>(entity);
             SpawnPlayerCharacter(clientEntity, networkTransform.Position, ref clientData);
-        });
-        
-        _eventBus.Subscribe((Entity clientEntity, ref ClientData clientData, ref ClientEntityRemoved _) =>
-        {
-            DespawnPlayerCharacter(clientEntity);
         });
     }
 
@@ -66,10 +74,11 @@ public class SpawnerPlayerCharacterSystem : BaseSystem
         
         var controlled = world.Get<ControlledEntity>(clientEntity);
         var clientData = world.Get<ClientData>(clientEntity);
-        if (!world.IsAlive(controlled.Reference))
+        if (!world.Validate(controlled.Reference))
             return;
         
-        world.Destroy(controlled.Reference);
+        world.Delete(controlled.Reference);
+        Console.WriteLine(Thread.CurrentThread.Name);
         _logger.Debug($"Player character with id {clientData.Id}");
     }
 }

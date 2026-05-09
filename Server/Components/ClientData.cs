@@ -1,9 +1,10 @@
+using Hypercube.Ecs.Components;
 using Server.Systems.Network;
 using Shared.Data;
 
 namespace Server.Components;
 
-public struct ClientData
+public struct ClientData : IComponent
 {
     public Queue<Packet> PendingPackets = [];
     public Queue<Packet> IncomingPackets = [];

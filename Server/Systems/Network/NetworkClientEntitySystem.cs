@@ -1,10 +1,11 @@
-using Arch.Core;
+using Hypercube.Ecs;
+using Hypercube.Ecs.Events;
+using Hypercube.Ecs.Queries;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using LiteNetLib;
 using Server.Components;
 using Server.Components.Events;
-using Server.Events;
 using Shared.Data;
 using Shared.Helpers;
 
@@ -17,11 +18,12 @@ public class NetworkClientEntitySystem : BaseSystem
     [Dependency] private readonly Logger _logger = null!;
     [Dependency] private readonly NetworkServer _networkServer = null!;
     
-    private readonly QueryDescription _query = new QueryDescription().WithAll<ClientData>();
+    private Query _query = null!;
     private readonly Dictionary<long, Entity> _clients = [];
 
     public override void Initialize()
     {
+        _query = GetQuery().WithAll<ClientData>().Build();
         _eventBus.Subscribe((ref ClientConnected args) =>
         {
             RegisterClientEntity(args.ClientConnection);
@@ -32,9 +34,9 @@ public class NetworkClientEntitySystem : BaseSystem
             if (!_clients.TryGetValue(args.ClientConnection.Id, out var entity))
                 return;
             
-            _eventBus.Raise<ClientData, ClientEntityRemoved>(entity, new ClientEntityRemoved());
+            _eventBus.Raise(entity, ref world.Get<ClientData>(entity), new ClientEntityRemoved());
             DestroyClientEntity(args.ClientConnection.Id);
-        }, EventBusPriority.Lowest);
+        }, (int)EventBusPriority.Lowest);
     }
 
     public Entity GetClientEntity(long clientId)
@@ -47,7 +49,7 @@ public class NetworkClientEntitySystem : BaseSystem
         if (!_clients.TryGetValue(clientId, out var entity))
             return;
         
-        world.Destroy(entity);
+        world.Delete(entity);
         _clients.Remove(clientId);
         _logger.Debug($"Client {clientId} has been destroyed");
     }
@@ -58,7 +60,7 @@ public class NetworkClientEntitySystem : BaseSystem
         world.Add(entity, new ClientData { ClientConnection = clientConnection, Id = clientConnection.Id });
         _clients.Add(clientConnection.Id, entity);
         
-        _eventBus.Raise<ClientData, NewEntityClient>(entity, new NewEntityClient { ClientEntity = entity });
+        _eventBus.Raise(entity, ref world.Get<ClientData>(entity), new NewEntityClient { ClientEntity = entity });
     }
 
     private void HandleIncomingPackets(Entity entity, ref ClientData clientData)
@@ -87,7 +89,7 @@ public class NetworkClientEntitySystem : BaseSystem
     
     public override void BeforeUpdate(long tick)
     {
-        world.Query(in _query, (Entity entity, ref ClientData clientData) =>
+        _query.With((Entity entity, ref ClientData clientData) =>
         {
            HandleIncomingPackets(entity, ref clientData);
            HandleOutgoingPackets(ref clientData);

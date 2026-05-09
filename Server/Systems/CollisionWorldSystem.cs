@@ -1,4 +1,6 @@
-﻿using Arch.Core;
+﻿using Hypercube.Ecs;
+using Hypercube.Ecs.Lifetime;
+using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics.Shapes;
 using Hypercube.Mathematics.Vectors;
 using Shared.Components;
@@ -10,22 +12,25 @@ public class CollisionWorldSystem : BaseSystem
 {
     private const int CellSize = 128;
     
+    
     // ChunkId -> List<Entity>
     private readonly Dictionary<Vector2i, List<Entity>> _grid = new();
-    private readonly QueryDescription _query = new QueryDescription().WithAll<NetworkTransform, HitboxComponent>();
+    private Query _query = null!;
 
     public override void Initialize()
     {
-        /*world.SubscribeComponentRemoved<HitboxComponent>((in entity, ref hitbox) =>
+        _query = GetQuery().WithAll<NetworkTransform, HitboxComponent>().Build();
+        
+        Subscribe((Entity entity, ref HitboxComponent hitbox, ref RemovedEvent args) =>
         {
             Console.WriteLine("removed hitbox");
             UnregisterEntity(entity, ref hitbox);
-        });*/
+        });
     }
 
     public override void Update(long tick)
     {
-        world.Query(in _query, (Entity entity, ref NetworkTransform trans, ref HitboxComponent hitbox, ref HitboxComponent presence) =>
+        _query.With((Entity entity, ref NetworkTransform trans, ref HitboxComponent hitbox, ref HitboxComponent presence) =>
         {
             var currentGridIndex = WorldToGrid(trans.Position);
             

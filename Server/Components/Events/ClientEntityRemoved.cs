@@ -1,4 +1,4 @@
-﻿using Server.Events;
+﻿using Hypercube.Ecs.Events;
 
 namespace Server.Components.Events;
 

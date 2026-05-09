@@ -1,10 +1,10 @@
-using Arch.Core;
+using Hypercube.Ecs;
+using Hypercube.Ecs.Queries;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using MessagePack;
 using Server.Components;
 using Shared.Data;
-using Exception = System.Exception;
 
 namespace Server.Systems.Network;
 
@@ -12,16 +12,16 @@ namespace Server.Systems.Network;
 public class HandleIncomingClientPacketsSystem : BaseSystem
 {
     [Dependency] private readonly ILogger _logger = null!;
-    private QueryDescription _query;
+    private Query _query = null!;
     
     public override void Initialize()
     {
-        _query = new QueryDescription().WithAll<ClientData>();
+        _query = GetQuery().WithAll<ClientData>().Build();
     }
     
     public override void BeforeUpdate(long tick)
     {
-        world.Query(in _query, (Entity entity, ref ClientData playerData) =>
+        _query.With((Entity entity, ref ClientData playerData) =>
         {
             while (playerData.IncomingPackets.Count > 0)
             {

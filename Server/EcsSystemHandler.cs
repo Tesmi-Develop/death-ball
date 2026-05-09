@@ -1,5 +1,5 @@
 using System.Reflection;
-using Arch.Core;
+using Hypercube.Ecs;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using Hypercube.Utilities.Helpers;

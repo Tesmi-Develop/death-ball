@@ -1,16 +1,19 @@
-using Arch.Core;
+using Hypercube.Ecs;
+using Hypercube.Ecs.Components;
+using Hypercube.Ecs.Queries;
 using Server.Extensions;
 using Server.Components;
 using Shared.Data;
+using Shared.Extensions;
 
 namespace Server.Helpers;
 
 public static class NetworkHelper
 {
-    private static readonly QueryDescription NetworkComponentQueryMeta = new QueryDescription().WithAll<NetworkMetadata>();
+    private static Query? _networkComponentQueryMeta;
     private static NetworkMetadata? _networkComponents;
     
-    public static void MakeDirty<T>(World world, Entity entity) where T : struct
+    public static void MakeDirty<T>(World world, Entity entity) where T : struct, IComponent
     {
         if (!world.Has<T>(entity))
             throw new Exception($"Component {typeof(T).Name} does not exist.");
@@ -30,11 +33,13 @@ public static class NetworkHelper
 
     public static NetworkMetadata GetNetworkComponentMetadata(World world)
     {
+        _networkComponentQueryMeta ??= new QueryBuilder(world).WithAll<NetworkMetadata>().Build();
+        
         if (_networkComponents is not null)
             return _networkComponents.Value;
 
-        var entity = world.GetFirstEntity(NetworkComponentQueryMeta);
-        if (entity == Entity.Null)
+        var entity = world.GetFirstEntity(_networkComponentQueryMeta);
+        if (entity == Entity.Invalid)
             throw new Exception("Not found list with network components.");
             
         _networkComponents = world.Get<NetworkMetadata>(entity);
@@ -68,7 +73,7 @@ public static class NetworkHelper
 
     public static bool TryGetInputFromTick<T>(World world, Entity clientEntity, long tick, out T? input)
     {
-        input = default(T);
+        input = default;
         
         if (!world.Has<ClientData>(clientEntity))
             throw new ArgumentException("Entity is not client");

@@ -1,6 +1,7 @@
 ﻿using Hypercube.Core.Ecs;
 using Hypercube.Core.Execution.LifeCycle;
 using Hypercube.Ecs;
+using Hypercube.Ecs.Lifetime;
 using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics.Shapes;
 using Hypercube.Mathematics.Vectors;
@@ -19,10 +20,11 @@ public class CollisionWorldSystem : EntitySystem
     public override void Initialize()
     {
         _query = GetQuery().WithAll<NetworkTransform, HitboxComponent>().Build();
-        /*World.SubscribeComponentRemoved<GridPresenceComponent>((in entity, ref presence) =>
+        Subscribe((Entity entity, ref HitboxComponent hitbox, ref RemovedEvent args) =>
         {
-            UnregisterEntity(entity, ref presence);
-        });*/
+            Console.WriteLine("removed hitbox");
+            UnregisterEntity(entity, ref hitbox);
+        });
     }
 
     public override void AfterUpdate(FrameEventArgs args)

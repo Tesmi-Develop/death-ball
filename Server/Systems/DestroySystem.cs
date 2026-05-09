@@ -1,4 +1,4 @@
-using Arch.Core;
+using Hypercube.Ecs.Queries;
 using Server.Components;
 
 namespace Server.Systems;
@@ -6,18 +6,18 @@ namespace Server.Systems;
 [EcsSystem(EcsPriority.Low)]
 public class DestroySystem : BaseSystem
 {
-    private QueryDescription _query;
+    private Query _query = null!;
 
     public override void Initialize()
     {
-        _query = new QueryDescription().WithAll<DestroyTag>();
+        _query = GetQuery().WithAll<DestroyTag>().Build();
     }
 
     public override void AfterUpdate(long tick)
     {
-        world.Query(in _query, entity =>
+        _query.ForEach(entity =>
         {
-            world.Destroy(entity);
+            world.Delete(entity);
         });
     }
 }

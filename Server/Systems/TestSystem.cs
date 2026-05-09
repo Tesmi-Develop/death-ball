@@ -1,13 +1,10 @@
-using Arch.Core;
-using Hypercube.Mathematics;
+using Hypercube.Ecs.Events;
+using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics.Random;
 using Hypercube.Mathematics.Shapes;
 using Hypercube.Mathematics.Vectors;
 using Hypercube.Utilities.Dependencies;
 using Server.Components;
-using Server.Events;
-using Server.Extensions;
-using Server.Helpers;
 using Server.Utilities;
 using Shared.Components;
 
@@ -20,8 +17,7 @@ public class TestSystem : BaseSystem
     [Dependency] private readonly Time _time = null!;
     private Rect2 _arenaSize = new Rect2(-200, 200, 200, -200);
     private Xoshiro256 _random = new(new Random().Next());
-    private QueryDescription _query;
-    private QueryDescription _query2;
+    private Query _query = null!;
     private float _speed = 5;
     private int counter = 0;
     
@@ -52,7 +48,7 @@ public class TestSystem : BaseSystem
             }
         });*/
  
-        _query = new QueryDescription().WithAll<NetworkTransform, TargetLocation>();
+        _query = GetQuery().WithAll<NetworkTransform, TargetLocation>().Build();
     }
 
     private Vector2 GetRandomPosition()
@@ -63,7 +59,7 @@ public class TestSystem : BaseSystem
 
     public override void Update(long tick)
     {
-        world.Query(in _query, (Entity entity, ref NetworkTransform networkTransform, ref TargetLocation location) =>
+        /*world.Query(in _query, (Entity entity, ref NetworkTransform networkTransform, ref TargetLocation location) =>
         {
             if ((location.Location - networkTransform.Position).Length <= 10)
             {
@@ -75,6 +71,6 @@ public class TestSystem : BaseSystem
                 HyperMath.MoveTowards(networkTransform.Position.Y, location.Location.Y, _speed));
             
             NetworkHelper.MakeDirty<NetworkTransform>(world, entity);
-        });
+        });*/
     }
 }

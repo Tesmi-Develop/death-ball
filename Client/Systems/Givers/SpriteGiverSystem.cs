@@ -5,6 +5,7 @@ using Hypercube.Core.Systems.Rendering;
 using Hypercube.Ecs;
 using Hypercube.Ecs.Queries;
 using Shared.Components;
+using Shared.Extensions;
 
 namespace Client.Systems.Givers;
 

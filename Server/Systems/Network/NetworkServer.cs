@@ -1,11 +1,12 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
+using Hypercube.Ecs.Events;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using LiteNetLib;
 using Server.Components.Events;
-using Server.Events;
 using Server.Utilities;
 using Shared.Data;
 using Shared.Helpers;
@@ -22,6 +23,7 @@ public class NetworkServer : BaseSystem, INetEventListener
     private readonly NetManager _server;
     private readonly ConcurrentDictionary<NetPeer, ClientConnection> _connections = [];
     private readonly ConcurrentQueue<IEvent> _eventQueue = [];
+    private readonly Dictionary<Type, Action<object>> _globalEventCache = [];
     private long _freeClientId;
 
     public NetworkServer()
@@ -44,8 +46,30 @@ public class NetworkServer : BaseSystem, INetEventListener
 
     public override void Update(long tick)
     {
+        
         while (_eventQueue.TryDequeue(out var eventInstance))
-            _eventBus.Raise(eventInstance);
+            RaiseEvent(eventInstance);
+    }
+
+    private void RaiseEvent(IEvent eventArgs)
+    {
+        var type = eventArgs.GetType();
+
+        if (!_globalEventCache.TryGetValue(type, out var action))
+        {
+            var busType = _eventBus.GetType();
+            var method = busType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .First(m => m.Name == nameof(IEventBus.Raise) && 
+                            m.GetGenericArguments().Length == 1 &&
+                            m.GetParameters()[0].ParameterType.IsByRef == false)
+                .MakeGenericMethod(type);
+
+            // (obj) => Raise<ActualType>((ActualType)obj)
+            action = (object ev) => method.Invoke(_eventBus, [ev]);
+            _globalEventCache[type] = action;
+        }
+
+        action(eventArgs);
     }
 
     private async Task ReceiveCycle()

@@ -63,7 +63,7 @@ public sealed class CollisionDebugRenderSystem : PatchEntitySystem
             
             _entities.Clear();
             _collisionWorld.GetNearby(gridIndex, _entities);
-
+            
             foreach (var targetEntity in _entities)
             {
                 if (!TryGetComponent(targetEntity, out HitboxComponent targetHitboxComponent))

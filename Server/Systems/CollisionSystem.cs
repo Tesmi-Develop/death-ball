@@ -1,4 +1,5 @@
-﻿using Arch.Core;
+﻿using Hypercube.Ecs;
+using Hypercube.Ecs.Queries;
 using Hypercube.Mathematics.Vectors;
 using Hypercube.Physics;
 using Hypercube.Physics.Manifolds;
@@ -12,13 +13,14 @@ public class CollisionSystem : BaseSystem
 {
     [Dependency] private readonly CollisionWorldSystem _worldSystem = null!;
     private readonly List<Entity> _neighborBuffer = new(32);
-    
-    private readonly QueryDescription _movableQuery = new QueryDescription()
-        .WithAll<NetworkTransform, HitboxComponent>();
+
+    private Query _movableQuery = null!;
+        
 
     public override void Update(long tick)
     {
-        world.Query(in _movableQuery, (Entity entity, ref NetworkTransform trans, ref HitboxComponent hitbox) =>
+        _movableQuery = GetQuery().WithAll<NetworkTransform, HitboxComponent>().Build();
+        _movableQuery.With((Entity entity, ref NetworkTransform trans, ref HitboxComponent hitbox) =>
         {
             if (hitbox.IsStatic || !hitbox.GridIndex.HasValue) 
                 return;
@@ -44,11 +46,8 @@ public class CollisionSystem : BaseSystem
         ref var hitboxA = ref world.Get<HitboxComponent>(entityA);
         ref var hitboxB = ref world.Get<HitboxComponent>(entityB);
         
-        //Console.WriteLine(transformA.Position);
-        //Console.WriteLine(transformB.Position);
-        
-        /*if (hitboxB.IsTrigger)
-            return Manifold.Empty;*/
+        if (hitboxB.IsTrigger)
+            return Manifold.Empty;
         
         var manifold = GetManifold(ref transformA, ref hitboxA, ref transformB, ref hitboxB);
         if (manifold.IsEmpty)
