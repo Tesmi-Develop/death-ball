@@ -26,6 +26,6 @@ public class MapRender : BaseSystem, IPatch
 
     public void Draw(IRenderContext renderer, DrawPayload payload)
     {
-        _mapHandler.Draw(renderer, Vector2.Zero, Vector2.One / 2, new Vector2(2));
+        _mapHandler.Draw(renderer, Vector2.Zero, Vector2.One / 2, new Vector2(1));
     }
 }

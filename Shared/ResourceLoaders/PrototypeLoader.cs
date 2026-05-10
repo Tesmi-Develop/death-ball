@@ -3,7 +3,7 @@ using Hypercube.Core.Resources;
 using Hypercube.Core.Resources.FileSystems;
 using Hypercube.Core.Resources.Loaders;
 
-namespace Shared;
+namespace Shared.ResourceLoaders;
 
 public class PrototypeLoader : ResourceLoader<PrototypeStorage>
 {

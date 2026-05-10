@@ -36,6 +36,8 @@ public class EntrySystem : EntitySystem
     private readonly List<ClientSystem> _updateSystems = [];
     private readonly List<ClientSystem> _afterUpdateSystems = [];
 
+    public long CurrentTick { get; private set; }
+    
     public override void Initialize()
     {
         _dependenciesContainer = new DependenciesContainer(_globalContainer);
@@ -167,6 +169,8 @@ public class EntrySystem : EntitySystem
     
     public void InvokeGameUpdatePhase(long tick, long predictTick)
     {
+        CurrentTick = tick;
+        
         foreach (var system in _beforeGameUpdateSystems)
             system.BeforeGameUpdate(tick, predictTick);
 

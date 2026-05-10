@@ -19,11 +19,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c1c7b2eb-22e8-441c-b205-3258787a3c4a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DeathBall/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DeathBall/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/InternalSystems/FieldHistorySystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/InternalSystems/FieldHistorySystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client/Systems/Givers/SpriteGiverSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Systems/Givers/SpriteGiverSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Extensions/EntityExtensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Extensions/EntityExtensions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Systems/SpawnerPlayerCharacterSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Systems/SpawnerPlayerCharacterSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Shared/Systems/Collisions/CollisionWorldSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Shared/Systems/Collisions/CollisionWorldSystem.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/src/Hypercube.Core/Ecs/EntitySystemManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/src/Hypercube.Core/Ecs/EntitySystemManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hypercube/src/Hypercube.Core/Execution/RuntimeExceptionHandling.cs" beforeDir="false" afterPath="$PROJECT_DIR$/hypercube/src/Hypercube.Core/Execution/RuntimeExceptionHandling.cs" afterDir="false" />
@@ -246,33 +241,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Project.Client.executor&quot;: &quot;Run&quot;,
-    &quot;.NET Project.Client2.executor&quot;: &quot;Run&quot;,
-    &quot;.NET Project.Rainclipse.executor&quot;: &quot;Run&quot;,
-    &quot;.NET Project.Server.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.29953918&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;shared-systems&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\JetBrains Rider 2026.1.0.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Project.Client.executor": "Run",
+    ".NET Project.Client2.executor": "Run",
+    ".NET Project.Rainclipse.executor": "Run",
+    ".NET Project.Server.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "XThreadsFramesViewSplitterKey": "0.53453946",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "dev",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "configurable.group.appearance",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\JetBrains Rider 2026.1.0.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected=".NET Project.Server">
+}]]></component>
+  <component name="RunManager" selected="Compound.Server + Client">
     <configuration name="Server + Client" type="CompoundRunConfigurationType">
       <toRun name="Client" type="DotNetProject" />
       <toRun name="Server" type="DotNetProject" />

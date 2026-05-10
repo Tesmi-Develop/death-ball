@@ -5,7 +5,7 @@ using Hypercube.Core.Resources.FileSystems;
 using Hypercube.Core.Resources.Loaders;
 using Shared.ResourcesData;
 
-namespace Shared;
+namespace Shared.ResourceLoaders;
 
 public class TiledTilesetLoader : ResourceLoader<TiledTileset>
 {

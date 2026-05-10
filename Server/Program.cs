@@ -1,18 +1,17 @@
-﻿using Hypercube.Core;
-using Hypercube.Core.Resources;
+﻿using Hypercube.Core.Resources;
 using Hypercube.Ecs;
 using Hypercube.Ecs.Events;
 using Hypercube.Physics;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 using Server.Utilities;
+using Shared;
 using Shared.Helpers;
 
 namespace Server;
 
 public static class Program
 {
-    private static readonly int TickRate = 60;
     private static readonly int MaxCatchUpTicks = 5;
 
     private static void InitResourceManager(DependenciesContainer dependenciesContainer)
@@ -20,7 +19,7 @@ public static class Program
         var instance = new ResourceManager();
         dependenciesContainer.RegisterSingleton<IResourceManager>(instance);
         instance.AddAllLoaders();
-        instance.Mount(Config.MountFolders);
+        instance.Mount(Hypercube.Core.Config.MountFolders);
     }
     
     public static void Main()
@@ -49,7 +48,7 @@ public static class Program
 
     public static void StartCycle(Time time, EcsSystemEntry entry)
     {
-        var tickIntervalMs = 1000.0 / TickRate;
+        var tickIntervalMs = 1000.0 / Config.TickRate;
         var nextTickTime = time.Stopwatch.Elapsed.TotalMilliseconds;
         var startTime = time.Stopwatch.Elapsed.TotalMilliseconds;
 
