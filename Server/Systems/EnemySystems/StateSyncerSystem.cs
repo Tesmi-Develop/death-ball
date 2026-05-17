@@ -9,10 +9,10 @@ using Shared.SharedSystemRealisation;
 namespace Server.Systems.EnemySystems;
 
 [EcsSystem]
-public class StateUpdaterSystem : BaseSystem
+public class StateSyncerSystem : BaseSystem
 {
     private QueryMeta _meta = new QueryMeta().WithAll<State>();
-    
+
     [Priority(EcsPriority.StateUpdater)]
     public override void AfterGameUpdate(long tick, long predictTick)
     {
@@ -20,7 +20,7 @@ public class StateUpdaterSystem : BaseSystem
         {
             if (state.StateType == state.PrevStateType)
                 return;
-
+            
             state.PrevStateType = state.StateType;
             NetworkHelper.MakeDirty<State>(World, entity);
         });

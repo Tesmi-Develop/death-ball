@@ -1,12 +1,22 @@
 ﻿using Hypercube.Ecs.Components;
 using Hypercube.Mathematics.Vectors;
+using Shared.Attributes;
 using Shared.ResourcesData;
 
-namespace Client.Components.AnimationComponents;
+namespace Shared.Components;
 
-public struct Animator : IComponent
+[SyncComponent]
+public partial struct Animator : IComponent
 {
+    [NonSynced]
     public AnimationClip? CurrentClip = null;
+    [NonSynced]
+    public int PrevFrameIndex = -1;
+    [NonSynced] 
+    public List<EventData> CurrentEvents = [];
+    [NonSynced]
+    public bool ActiveEvents = false;
+    public string CurrentClipName = string.Empty;
     public bool IsPlaying = false;
     public bool IsPaused = false;
     public bool IsLooping = false;

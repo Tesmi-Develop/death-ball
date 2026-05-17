@@ -19,6 +19,12 @@ public class PlayerTargetScannerSystem : BaseSystem
     {
         Query(_queryMeta).With((Entity e, ref Target target, ref NetworkTransform transform) =>
         {
+            if (target.TargetAcquisitionRadius > target.TargetRetentionRadius)
+            {
+                Logger.Warning($"TargetAcquisitionRadius cannot be greater than TargetRetentionRadius, {e}");
+                return;
+            }
+            
             if (target.TargetEntity.HasValue && (!EntityAlive(target.TargetEntity.Value) ||
                                                  !HasComponent<NetworkTransform>(target.TargetEntity.Value))
                 )
@@ -30,7 +36,7 @@ public class PlayerTargetScannerSystem : BaseSystem
             if (target.TargetEntity.HasValue)
             {
                 var targetTransform = GetComponent<NetworkTransform>(target.TargetEntity.Value);
-                if (ValidateTarget(targetTransform, transform, target.TargetRadius))
+                if (ValidateDistance(targetTransform, transform, target.TargetRetentionRadius))
                     return;
                 
                 target.TargetEntity = null;
@@ -40,7 +46,7 @@ public class PlayerTargetScannerSystem : BaseSystem
             foreach (var characterEntity in Query(_playerQuery))
             {
                 var targetTransform = GetComponent<NetworkTransform>(characterEntity);
-                if (!ValidateTarget(targetTransform, transform, target.TargetRadius))
+                if (!ValidateDistance(targetTransform, transform, target.TargetAcquisitionRadius))
                     continue;
                 
                 target.TargetEntity = characterEntity;
@@ -50,7 +56,7 @@ public class PlayerTargetScannerSystem : BaseSystem
         });
     }
 
-    private bool ValidateTarget(NetworkTransform targetTransform, NetworkTransform myTransform, int targetRadius)
+    private bool ValidateDistance(NetworkTransform targetTransform, NetworkTransform myTransform, int targetRadius)
     {
         var distance = targetTransform.Position.Distance(myTransform.Position);
         return distance <= targetRadius;

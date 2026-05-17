@@ -1,6 +1,4 @@
-﻿
-
-using Hypercube.Ecs.Components;
+﻿using Hypercube.Ecs.Components;
 using Shared.Attributes;
 
 namespace Shared.Components.Enemies;

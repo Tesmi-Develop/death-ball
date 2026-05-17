@@ -1,9 +1,9 @@
-using Hypercube.Ecs;
+﻿using Hypercube.Ecs;
 using Shared.Components;
 
 namespace Server.Extensions;
 
-public static class WorldExtensions 
+public static class EntityExtension
 {
     
 }

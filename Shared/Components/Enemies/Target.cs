@@ -14,5 +14,6 @@ public partial struct Target : IComponent
     [NonSynced]
     public Entity? TargetEntity;
 
-    public int TargetRadius;
+    public int TargetAcquisitionRadius;
+    public int TargetRetentionRadius;
 }

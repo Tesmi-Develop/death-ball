@@ -2,7 +2,4 @@
 
 namespace Server.Utilities;
 
-public class BaseSystem : SharedSystem
-{
-    
-}
+public class BaseSystem : SharedSystem;

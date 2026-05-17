@@ -1,4 +1,5 @@
 ﻿using Hypercube.Ecs.Components;
+using Hypercube.Mathematics.Vectors;
 using Shared.Attributes;
 using Shared.Components.Enemies;
 
@@ -9,6 +10,7 @@ public partial struct SpriteReference : IComponent
 {
     public string DefaultTexturePatch = string.Empty;
     public Dictionary<StateType, string> Animations = [];
+    public Vector2 Scale = Vector2.One;
     
     public SpriteReference()
     {

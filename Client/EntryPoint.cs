@@ -65,12 +65,7 @@ public static class EntryPoint
         var time = container.Resolve<ITime>();
         
         gameClient.Start();
-       /* var sound = resourceManager.Load<Audio>("/audio/game_boi_3.wav");
-        var source = audio.CreateSource(sound);
-        
-        source.Start();*/
-
-        /*while (!gameClient.Connected)
+        while (!gameClient.Connected)
         {
             gameClient.ConnectAsync("127.0.0.1", 5000).ContinueWith(task =>
             {
@@ -80,7 +75,7 @@ public static class EntryPoint
                 }
             });
             Thread.Sleep(1000);
-        }*/
+        }
     }
     
     public static void StartPreload(PreloadContext preloadContext, ILogger logger, ManualResetEventSlim loaded)

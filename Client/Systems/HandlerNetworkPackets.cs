@@ -16,7 +16,7 @@ public class HandlerNetworkPackets : BaseSystem
     private List<Packet> _packetBuffer = new(128);
     
     [Priority(EcsPriority.High)]
-    public override void Update(FrameEventArgs deltaTime)
+    public override void BeforeUpdate(FrameEventArgs deltaTime)
     {
         var counter = 0;
 
