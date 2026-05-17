@@ -1,11 +1,11 @@
 using Hypercube.Ecs;
 
-namespace Server.Extensions;
+namespace Shared.Extensions;
 
 public static class EntityExtensions
 {
     public static long GetFullMask(this Entity entity)
     {
-        return (long)entity.Version << 4 | entity.Id;
+        return (long)entity.Version << 32 | entity.Id;
     }
 }
